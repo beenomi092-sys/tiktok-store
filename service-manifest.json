@@ -1,0 +1,27 @@
+{
+  "name": "TikTok Support Chat",
+  "short_name": "Support Chat",
+  "description": "TikTok Store Support Chat",
+  "start_url": "/service",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "id": "/service",
+  "categories": ["shopping", "business"],
+  "icons": [
+    {
+      "src": "https://firebasestorage.googleapis.com/v0/b/tiktokstore-playstore.firebasestorage.app/o/icons%2Ficon-192.png?alt=media&token=e4f7e84c-b28f-41bd-bf3a-ccfd2f33642c",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://firebasestorage.googleapis.com/v0/b/tiktokstore-playstore.firebasestorage.app/o/icons%2Ficon-512.png?alt=media&token=8af61e9e-14b2-41f1-8e46-e9854a230046",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,4226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#000000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    
+    <title>Support Chat - TikTok Shop</title>
+    
+ <link rel="icon" type="image/png" sizes="192x192" href="https://firebasestorage.googleapis.com/v0/b/tiktokstore-playstore.firebasestorage.app/o/icons%2Ficon-192.png?alt=media&token=e4f7e84c-b28f-41bd-bf3a-ccfd2f33642c">
+<link rel="icon" type="image/png" sizes="512x512" href="https://firebasestorage.googleapis.com/v0/b/tiktokstore-playstore.firebasestorage.app/o/icons%2Ficon-512.png?alt=media&token=8af61e9e-14b2-41f1-8e46-e9854a230046">
+<link rel="apple-touch-icon" sizes="192x192" href="https://firebasestorage.googleapis.com/v0/b/tiktokstore-playstore.firebasestorage.app/o/icons%2Ficon-192.png?alt=media&token=e4f7e84c-b28f-41bd-bf3a-ccfd2f33642c">
+<link rel="apple-touch-icon" sizes="512x512" href="https://firebasestorage.googleapis.com/v0/b/tiktokstore-playstore.firebasestorage.app/o/icons%2Ficon-512.png?alt=media&token=8af61e9e-14b2-41f1-8e46-e9854a230046">
+    
+    <link rel="manifest" href="/service-manifest.json">
+    
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging-compat.js"></script>
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        :root {
+            --primary: #FE2C55;
+            --secondary: #25F4EE;
+            --green: #22c55e;
+            --red: #ef4444;
+            --blue: #3b82f6;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f0f2f5;
+            -webkit-font-smoothing: antialiased;
+            overscroll-behavior: none;
+            position: fixed;
+            width: 100%;
+        }
+
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            height: -webkit-fill-available;
+            height: 100dvh;
+            max-width: 100%;
+            background: #f0f2f5;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* ===== HEADER ===== */
+        .chat-header {
+            background: #000000;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+            z-index: 100;
+            padding-top: calc(12px + env(safe-area-inset-top));
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chat-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 50%, rgba(37,244,238,0.08) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 50%, rgba(254,44,85,0.08) 0%, transparent 50%);
+            animation: headerGlow 8s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes headerGlow {
+            0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.5; }
+            50% { transform: translate(-5%, -5%) scale(1.1); opacity: 1; }
+        }
+
+        .hamburger-btn {
+            background: rgba(255,255,255,0.08);
+            border: none;
+            color: white;
+            width: 38px;
+            height: 38px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.2s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hamburger-btn:hover { background: rgba(255,255,255,0.15); }
+        .hamburger-btn:active { transform: scale(0.95); }
+        .hamburger-btn svg { width: 22px; height: 22px; }
+
+        .hamburger-btn .unread-dot {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            min-width: 18px;
+            height: 18px;
+            background: #ef4444;
+            border-radius: 9px;
+            border: 2px solid #000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 0 4px;
+            color: white;
+        }
+
+        .hamburger-btn .unread-dot.show { display: flex; }
+
+        .header-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            min-width: 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #25F4EE, #FE2C55);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            position: relative;
+            box-shadow: 0 0 20px rgba(37,244,238,0.3);
+        }
+
+        .header-avatar svg { width: 22px; height: 22px; }
+
+        .header-avatar::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 12px;
+            height: 12px;
+            background: var(--green);
+            border-radius: 50%;
+            border: 2.5px solid #000;
+            box-shadow: 0 0 8px rgba(34,197,94,0.6);
+        }
+
+        .header-text { display: flex; flex-direction: column; min-width: 0; }
+
+        .header-title {
+            color: white;
+            font-size: 15px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .header-status {
+            color: var(--green);
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .header-actions { display: flex; gap: 8px; position: relative; z-index: 1; }
+
+        .sound-toggle-btn {
+            background: rgba(255,255,255,0.08);
+            border: none;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .sound-toggle-btn.muted { background: rgba(239,68,68,0.2); color: #ef4444; }
+        .sound-toggle-btn svg { width: 18px; height: 18px; }
+
+        /* ===== CHAT MESSAGES AREA ===== */
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            background: #e4e6eb;
+            -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
+        }
+
+        .chat-messages::-webkit-scrollbar { width: 4px; }
+        .chat-messages::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 2px; }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #94a3b8;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+        }
+
+        .empty-state-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .empty-state-icon svg { width: 40px; height: 40px; color: #cbd5e1; }
+        .empty-state-title { font-size: 18px; font-weight: 600; color: #64748b; margin-bottom: 8px; }
+        .empty-state-text { font-size: 13px; color: #94a3b8; line-height: 1.5; max-width: 280px; }
+
+        .date-divider { text-align: center; padding: 12px 0; position: sticky; top: 0; z-index: 5; }
+
+        .date-divider span {
+            background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(10px);
+            padding: 4px 16px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #64748b;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        }
+
+        .msg-group {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            margin-bottom: 2px;
+            animation: msgSlideIn 0.3s ease forwards;
+            position: relative;
+            max-width: 100%;
+        }
+
+        @keyframes msgSlideIn {
+            0% { opacity: 0; transform: translateY(10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        .msg-group.sent { flex-direction: row-reverse; }
+
+        .msg-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #25F4EE, #FE2C55);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 13px;
+            flex-shrink: 0;
+            margin-bottom: 2px;
+        }
+
+        .msg-avatar.hidden { visibility: hidden; width: 0; margin: 0; }
+
+        .msg-bubble-wrapper { position: relative; max-width: 75%; min-width: 0; }
+
+        .msg-bubble {
+            padding: 10px 14px;
+            border-radius: 18px;
+            font-size: 14px;
+            line-height: 1.5;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+            position: relative;
+        }
+
+        .msg-group.sent .msg-bubble {
+            background: #000000;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .msg-group.received .msg-bubble {
+            background: #ffffff;
+            color: #1a1a1a;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+
+        .msg-time { font-size: 10px; margin-top: 4px; opacity: 0.7; text-align: right; }
+        .msg-group.received .msg-time { text-align: left; color: #94a3b8; }
+
+        .msg-image {
+            max-width: 240px;
+            max-height: 240px;
+            border-radius: 12px;
+            margin-bottom: 6px;
+            cursor: pointer;
+            display: block;
+            object-fit: cover;
+        }
+
+        .msg-recall-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 1.5px solid #e2e8f0;
+            color: #f59e0b;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+            flex-shrink: 0;
+            margin-bottom: 6px;
+            align-self: flex-end;
+        }
+
+        .msg-recall-btn:hover {
+            background: #fef3c7;
+            border-color: #f59e0b;
+            transform: scale(1.15);
+        }
+
+        .msg-recall-btn svg { width: 14px; height: 14px; }
+
+        .recalled-bubble {
+            background: #fef3c7 !important;
+            border: 1.5px dashed #f59e0b !important;
+            color: #92400e !important;
+            opacity: 0.85;
+        }
+
+        .recalled-bubble .recalled-header {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 6px;
+        }
+
+        .recalled-bubble .recalled-header svg { width: 14px; height: 14px; flex-shrink: 0; }
+        .recalled-bubble .recalled-header span { font-size: 11px; font-weight: 700; letter-spacing: 0.3px; }
+
+        .recalled-bubble .recalled-original {
+            font-size: 13px;
+            text-decoration: line-through;
+            opacity: 0.6;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+            line-height: 1.4;
+        }
+
+        /* ===== INPUT AREA ===== */
+        .chat-input-area {
+            background: #ffffff;
+            padding: 10px 12px;
+            padding-bottom: calc(10px + env(safe-area-inset-bottom));
+            border-top: 1px solid #e4e6eb;
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .input-action-btn {
+            background: none;
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.2s ease;
+        }
+
+        .input-action-btn:hover { background: #f1f5f9; color: #3b82f6; }
+        .input-action-btn svg { width: 22px; height: 22px; }
+
+.chat-textarea {
+    flex: 1;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 24px;
+    background: #f0f2f5;
+    font-size: 16px;
+    font-family: inherit;
+    outline: none;
+    color: #1a1a1a;
+    resize: none;
+    min-height: 42px;
+    max-height: 120px;
+    line-height: 1.4;
+    overflow-y: auto !important;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 #f0f2f5;
+    box-sizing: border-box;
+    display: block;
+    word-wrap: break-word;
+    overscroll-behavior: contain;
+}
+
+.chat-textarea::-webkit-scrollbar {
+    width: 6px;
+}
+
+.chat-textarea::-webkit-scrollbar-track {
+    background: #f0f2f5;
+    border-radius: 3px;
+}
+
+.chat-textarea::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+.chat-textarea::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+        .chat-textarea::placeholder { color: #9ca3af; }
+        .chat-textarea:focus { background: #e8eaed; }
+
+        .send-btn {
+            background: #000000;
+            border: none;
+            color: white;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.2s ease;
+        }
+
+        .send-btn:hover { background: var(--primary); }
+        .send-btn svg { width: 20px; height: 20px; }
+
+        /* ===== USERS SIDEBAR ===== */
+        .users-sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 330px;
+            max-width: 88vw;
+            height: 100vh;
+            height: 100dvh;
+            background: #ffffff;
+            z-index: 999999;
+            display: flex;
+            flex-direction: column;
+            transform: translateX(-100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 4px 0 24px rgba(0,0,0,0.15);
+        }
+
+        .users-sidebar.open { transform: translateX(0); }
+
+        .sidebar-header {
+            background: #000000;
+            padding: 16px 20px;
+            padding-top: calc(16px + env(safe-area-inset-top));
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .sidebar-header-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: white;
+            font-size: 17px;
+            font-weight: 700;
+        }
+
+        .sidebar-header-title svg { width: 24px; height: 24px; }
+
+        .sidebar-close-btn {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sidebar-close-btn svg { width: 16px; height: 16px; }
+
+        .sidebar-search {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f0f0f0;
+            flex-shrink: 0;
+            background: #ffffff;
+        }
+
+        .sidebar-search-box { position: relative; }
+
+        .sidebar-search-box svg {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            color: #94a3b8;
+        }
+
+        .sidebar-search-input {
+            width: 100%;
+            padding: 10px 14px 10px 38px;
+            border: none;
+            border-radius: 20px;
+            background: #f0f2f5;
+            font-size: 14px;
+            font-family: inherit;
+            outline: none;
+            color: #1a1a1a;
+        }
+
+        .sidebar-users-list {
+            flex: 1;
+            overflow-y: auto;
+            background: #ffffff;
+        }
+
+        .sidebar-users-list::-webkit-scrollbar { width: 4px; }
+        .sidebar-users-list::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 2px; }
+
+        .user-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: background 0.15s ease;
+            border-bottom: 1px solid #f8f8f8;
+            gap: 12px;
+            position: relative;
+        }
+
+        .user-item:hover { background: #f8fafc; }
+        .user-item.active { background: #eff6ff; border-left: 3px solid #3b82f6; padding-left: 13px; }
+        .user-item.pinned { background: #fffbeb; }
+        .user-item.pinned.active { background: #fef3c7; }
+
+        .user-item-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #25F4EE, #FE2C55);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 18px;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .user-item-avatar::after {
+            content: '';
+            position: absolute;
+            bottom: 1px;
+            right: 1px;
+            width: 12px;
+            height: 12px;
+            background: #22c55e;
+            border-radius: 50%;
+            border: 2.5px solid #ffffff;
+        }
+
+        .user-item-content { flex: 1; min-width: 0; }
+
+        .user-item-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 3px;
+        }
+
+        .user-item-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: #1a1a1a;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .user-item-name .pin-icon { font-size: 12px; flex-shrink: 0; }
+        .user-item-time { font-size: 11px; color: #94a3b8; flex-shrink: 0; }
+
+        .user-item-preview {
+            font-size: 13px;
+            color: #64748b;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .user-item-preview-text { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+
+        .user-item-preview.new-message .user-item-preview-text { color: #000000; font-weight: 700; }
+
+.user-item-badge {
+    min-width: 22px;
+    height: 22px;
+    padding: 0 7px;
+    background: #ef4444;
+    color: white;
+    border-radius: 11px;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+        .user-pin-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 6px;
+            font-size: 16px;
+            flex-shrink: 0;
+            transition: all 0.2s ease;
+            opacity: 0.4;
+        }
+
+        .user-pin-btn:hover { background: #fef3c7; opacity: 1; }
+        .user-item.pinned .user-pin-btn { opacity: 1; }
+
+        .users-loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            color: #94a3b8;
+            font-size: 14px;
+            gap: 12px;
+        }
+
+        .users-loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #e5e7eb;
+            border-top-color: #25F4EE;
+            border-bottom-color: #FE2C55;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .no-users-found { text-align: center; padding: 60px 20px; color: #94a3b8; font-size: 14px; }
+        .no-users-found svg { width: 60px; height: 60px; color: #cbd5e1; margin-bottom: 12px; }
+
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999998;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .sidebar-overlay.show { display: block; opacity: 1; }
+
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #ffffff;
+            z-index: 999999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading-screen.hidden { display: none; }
+
+        .loading-logo { width: 80px; height: 80px; animation: loadingPulse 1.5s ease-in-out infinite; }
+
+        @keyframes loadingPulse {
+            0%, 100% { transform: scale(0.95); }
+            50% { transform: scale(1.05); }
+        }
+
+        .loading-logo svg { width: 100%; height: 100%; }
+        .loading-text { color: #1a1a1a; font-size: 16px; font-weight: 600; margin-top: 20px; }
+        .loading-subtext { color: #94a3b8; font-size: 13px; margin-top: 4px; }
+        .loading-dots { display: flex; gap: 8px; margin-top: 16px; }
+
+        .loading-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #25F4EE;
+            animation: loadingDotBounce 1.2s ease-in-out infinite;
+        }
+
+        .loading-dot:nth-child(2) { background: #FE2C55; animation-delay: 0.2s; }
+        .loading-dot:nth-child(3) { background: #25F4EE; animation-delay: 0.4s; }
+
+        @keyframes loadingDotBounce {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-12px); }
+        }
+
+        .login-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #ffffff;
+            z-index: 999998;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .login-screen.hidden { display: none; }
+
+        .login-card {
+            background: white;
+            border-radius: 20px;
+            padding: 32px 24px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            border: 1px solid #f0f0f0;
+            text-align: center;
+        }
+
+        .login-logo {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-title { font-size: 22px; font-weight: 700; color: #1a1a1a; margin-bottom: 4px; }
+        .login-subtitle { font-size: 14px; color: #94a3b8; margin-bottom: 24px; }
+
+        .login-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 15px;
+            outline: none;
+            margin-bottom: 12px;
+            font-family: inherit;
+            transition: all 0.2s ease;
+            background: #f8fafc;
+        }
+
+        .login-input:focus {
+            border-color: #3b82f6;
+            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(59,130,246,0.1);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: #000000;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .login-btn:hover { background: var(--primary); }
+
+        .login-error { color: #ef4444; font-size: 13px; margin-top: 12px; display: none; }
+
+        .notif-banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, #25F4EE, #FE2C55);
+            color: white;
+            padding: 12px 16px;
+            padding-top: calc(12px + env(safe-area-inset-top));
+            z-index: 999997;
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+
+        .notif-banner.show { display: flex; }
+        .notif-banner-text { font-size: 13px; font-weight: 500; flex: 1; }
+
+        .notif-banner-btn {
+            background: white;
+            color: #1a1a1a;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .notif-banner-close {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .connection-status {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 4px 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-align: center;
+            z-index: 99999;
+            transition: all 0.3s ease;
+            transform: translateY(-100%);
+        }
+
+        .connection-status.show { transform: translateY(0); }
+        .connection-status.online { background: #dcfce7; color: #16a34a; }
+        .connection-status.offline { background: #fef2f2; color: #dc2626; }
+
+        .image-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 9999999;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .image-modal.active { display: flex; }
+
+        .image-modal img {
+            max-width: 100%;
+            max-height: 90vh;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+
+        .image-modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        .confirm-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 99999999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .confirm-popup.show { display: flex; }
+
+        .confirm-popup-content {
+            background: #ffffff;
+            border-radius: 16px;
+            max-width: 380px;
+            width: 100%;
+            padding: 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+            animation: popupSlide 0.3s ease;
+        }
+
+        @keyframes popupSlide {
+            0% { opacity: 0; transform: translateY(30px) scale(0.95); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .confirm-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: #fef3c7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+        }
+
+        .confirm-icon svg { width: 28px; height: 28px; }
+
+        .confirm-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+        }
+
+        .confirm-message {
+            font-size: 14px;
+            color: #64748b;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        .confirm-actions { display: flex; gap: 10px; }
+
+        .confirm-btn-cancel {
+            flex: 1;
+            padding: 12px 20px;
+            background: #f1f5f9;
+            color: #1a1a1a;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .confirm-btn-ok {
+            flex: 1;
+            padding: 12px 20px;
+            background: #f59e0b;
+            color: #ffffff;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .confirm-btn-ok:hover { background: #d97706; }
+        .confirm-btn-cancel:hover { background: #e2e8f0; }
+@media (max-width: 480px) {
+    .msg-bubble-wrapper { max-width: 80%; }
+    .chat-messages { padding: 12px; }
+    .chat-input-area { padding: 8px 10px; padding-bottom: calc(8px + env(safe-area-inset-bottom)); }
+    
+    .chat-textarea {
+        padding: 9px 14px !important;
+        font-size: 16px !important;
+        min-height: 40px !important;
+        max-height: 100px !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        -webkit-overflow-scrolling: touch !important;
+        touch-action: pan-y !important;
+        scrollbar-width: thin !important;
+        scrollbar-color: #cbd5e1 #f0f2f5 !important;
+    }
+    
+    .chat-textarea::-webkit-scrollbar {
+        width: 4px !important;
+        display: block !important;
+    }
+    
+    .chat-textarea::-webkit-scrollbar-track {
+        background: #f0f2f5 !important;
+        border-radius: 2px !important;
+    }
+    
+    .chat-textarea::-webkit-scrollbar-thumb {
+        background: #cbd5e1 !important;
+        border-radius: 2px !important;
+    }
+    
+    .send-btn { width: 40px; height: 40px; }
+    .header-avatar { width: 38px; height: 38px; }
+    .header-avatar svg { width: 20px; height: 20px; }
+    .users-sidebar { width: 300px; }
+}
+ /* ===== QUICK SEND BAR - FIXED SCROLL ===== */
+.quick-send-bar {
+    background: #ffffff;
+    border-top: 1px solid #e4e6eb;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+    overflow: hidden;
+    width: 100%;
+    max-width: 100%;
+}
+
+.quick-send-scroll {
+    flex: 1 1 auto;
+    min-width: 0;                    /* ✅ IMPORTANT - Scroll enable karta hai */
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;                /* ✅ Horizontal scroll ON */
+    overflow-y: hidden;
+    scrollbar-width: thin;
+    -ms-overflow-style: auto;
+    padding: 4px 2px;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    white-space: nowrap;             /* ✅ Buttons ek line mein rahen */
+}
+
+/* ===== QUICK SEND SCROLLBAR - VISIBLE ===== */
+.quick-send-scroll::-webkit-scrollbar {
+    height: 4px;
+    display: block !important;
+}
+
+.quick-send-scroll::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 2px;
+}
+
+.quick-send-scroll::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 2px;
+}
+
+/* ===== QUICK TEXT MANAGER POPUP ===== */
+.quick-text-manager {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 99999999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+
+.quick-text-manager-content {
+    background: #ffffff;
+    border-radius: 16px;
+    max-width: 500px;
+    width: 100%;
+    max-height: 85vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    animation: popupSlide 0.3s ease;
+}
+
+.quick-text-header {
+    padding: 16px 20px;
+    background: #000000;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.quick-text-header h3 {
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.quick-text-header button {
+    background: rgba(255,255,255,0.1);
+    border: none;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.quick-text-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+}
+
+.quick-text-item {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+    padding: 10px;
+    background: #f8fafc;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    align-items: center;
+}
+
+.quick-text-item input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    background: #ffffff;
+    color: #1a1a1a;
+}
+
+.quick-text-item input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+}
+
+.quick-text-item button {
+    background: #fee2e2;
+    color: #dc2626;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.quick-text-item button:hover {
+    background: #dc2626;
+    color: #ffffff;
+}
+
+.quick-text-footer {
+    padding: 12px 16px;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.quick-text-footer button {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.quick-text-add-btn {
+    background: #3b82f6;
+    color: white;
+}
+
+.quick-text-add-btn:hover {
+    background: #2563eb;
+}
+
+.quick-text-save-btn {
+    background: #22c55e;
+    color: white;
+}
+
+.quick-text-save-btn:hover {
+    background: #16a34a;
+}
+@media (max-width: 480px) {
+    .quick-send-bar {
+        padding: 6px 8px;
+        gap: 6px;
+    }
+    
+    .quick-send-scroll {
+        gap: 4px;
+        padding: 3px 2px;
+    }
+    
+    .quick-send-btn {
+        font-size: 11px;
+        padding: 5px 12px;
+        max-width: 140px;
+        min-width: fit-content;
+    }
+    
+    .quick-send-settings {
+        width: 30px;
+        height: 30px;
+        min-width: 30px;
+    }
+    
+    /* ✅ Mobile pe scrollbar chhota */
+    .quick-send-scroll::-webkit-scrollbar {
+        height: 3px;
+    }
+}
+/* ==========================================
+   🔥 FINAL OVERRIDE - MOBILE SCROLL FIX
+   ========================================== */
+
+/* === QUICK SEND BUTTONS SCROLL === */
+.quick-send-bar {
+    display: flex !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+}
+
+.quick-send-scroll {
+    display: flex !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    white-space: nowrap !important;
+    -webkit-overflow-scrolling: touch !important;
+    scroll-behavior: smooth !important;
+    scrollbar-width: thin !important;
+}
+
+.quick-send-scroll::-webkit-scrollbar {
+    display: block !important;
+    height: 4px !important;
+    width: 4px !important;
+}
+
+.quick-send-scroll::-webkit-scrollbar-track {
+    background: #f1f5f9 !important;
+    border-radius: 2px !important;
+}
+
+.quick-send-scroll::-webkit-scrollbar-thumb {
+    background: #cbd5e1 !important;
+    border-radius: 2px !important;
+}
+
+.quick-send-btn {
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+}
+
+/* === TEXTAREA SCROLL === */
+.chat-textarea {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-y !important;
+    scrollbar-width: thin !important;
+}
+
+.chat-textarea::-webkit-scrollbar {
+    display: block !important;
+    width: 6px !important;
+}
+
+.chat-textarea::-webkit-scrollbar-track {
+    background: #f0f2f5 !important;
+    border-radius: 3px !important;
+}
+
+.chat-textarea::-webkit-scrollbar-thumb {
+    background: #cbd5e1 !important;
+    border-radius: 3px !important;
+}
+
+/* === MOBILE SPECIFIC === */
+@media (max-width: 480px) {
+    .quick-send-scroll {
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        -webkit-overflow-scrolling: touch !important;
+        scrollbar-width: thin !important;
+    }
+    
+    .quick-send-scroll::-webkit-scrollbar {
+        display: block !important;
+        height: 3px !important;
+    }
+    
+    .quick-send-btn {
+        flex-shrink: 0 !important;
+        font-size: 11px !important;
+        padding: 5px 12px !important;
+        min-width: fit-content !important;
+    }
+    
+    .chat-textarea {
+        max-height: 100px !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        touch-action: pan-y !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+    
+    .chat-textarea::-webkit-scrollbar {
+        display: block !important;
+        width: 4px !important;
+    }
+}
+    </style>
+</head>
+<body>
+
+    <!-- ===== NOTIFICATION BANNER ===== -->
+    <div id="notifBanner" class="notif-banner">
+        <div style="font-size: 20px;">🔔</div>
+        <div class="notif-banner-text">
+            Enable notifications to get alerts when new messages arrive
+        </div>
+        <button class="notif-banner-btn" onclick="requestNotificationPermission()">Enable</button>
+        <button class="notif-banner-close" onclick="dismissNotifBanner()">✕</button>
+    </div>
+
+    <!-- ===== CONNECTION STATUS ===== -->
+    <div id="connectionStatus" class="connection-status offline">📡 Connecting...</div>
+
+    <!-- ===== USERS SIDEBAR ===== -->
+    <div id="sidebarOverlay" class="sidebar-overlay" onclick="closeUsersSidebar()"></div>
+    <div id="usersSidebar" class="users-sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-header-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#25F4EE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+                <span>All Users</span>
+            </div>
+            <button class="sidebar-close-btn" onclick="closeUsersSidebar()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+
+        <div class="sidebar-search">
+            <div class="sidebar-search-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"/>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input type="text" class="sidebar-search-input" id="userSearchInput" placeholder="Search users..." oninput="filterUsers(this.value)">
+            </div>
+        </div>
+
+        <div class="sidebar-users-list" id="usersListContainer">
+            <div class="users-loading">
+                <div class="users-loading-spinner"></div>
+                <div>Loading users...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== LOADING SCREEN ===== -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loading-logo">
+            <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                <path d="M10 18 L 54 18 L 58 56 C 58 58 56 60 54 60 L 10 60 C 8 60 6 58 6 56 Z" fill="#000000"/>
+                <path d="M22 18 C 22 10 26 6 32 6 C 38 6 42 10 42 18" stroke="#000000" stroke-width="4" fill="none" stroke-linecap="round"/>
+                <g transform="translate(-6, 15)">
+                    <path d="M45.4 13.2C44.4 12.4 43.7 11.2 43.3 9.8C43.1 9.2 43 8.5 43 7.8H38.5V26.5C38.5 26.8 38.5 27.1 38.4 27.4C38.1 29.2 36.6 30.6 34.8 30.6C32.6 30.6 30.8 28.8 30.8 26.6C30.8 24.4 32.6 22.6 34.8 22.6C35.2 22.6 35.6 22.7 36 22.8V19C35.5 18.9 35.1 18.9 34.6 18.9C30.5 18.9 27.2 22.2 27.2 26.3C27.2 30.4 30.5 33.7 34.6 33.7C38.7 33.7 42 30.4 42 26.3V17.8C43.4 18.8 45.1 19.4 46.9 19.5V15.7C46.6 15.6 45.8 15.4 45.4 13.2Z" fill="#25F4EE" transform="translate(-1.8, 0)"/>
+                    <path d="M45.4 13.2C44.4 12.4 43.7 11.2 43.3 9.8C43.1 9.2 43 8.5 43 7.8H38.5V26.5C38.5 26.8 38.5 27.1 38.4 27.4C38.1 29.2 36.6 30.6 34.8 30.6C32.6 30.6 30.8 28.8 30.8 26.6C30.8 24.4 32.6 22.6 34.8 22.6C35.2 22.6 35.6 22.7 36 22.8V19C35.5 18.9 35.1 18.9 34.6 18.9C30.5 18.9 27.2 22.2 27.2 26.3C27.2 30.4 30.5 33.7 34.6 33.7C38.7 33.7 42 30.4 42 26.3V17.8C43.4 18.8 45.1 19.4 46.9 19.5V15.7C46.6 15.6 45.8 15.4 45.4 13.2Z" fill="#FE2C55" transform="translate(1.8, 0)"/>
+                    <path d="M45.4 13.2C44.4 12.4 43.7 11.2 43.3 9.8C43.1 9.2 43 8.5 43 7.8H38.5V26.5C38.5 26.8 38.5 27.1 38.4 27.4C38.1 29.2 36.6 30.6 34.8 30.6C32.6 30.6 30.8 28.8 30.8 26.6C30.8 24.4 32.6 22.6 34.8 22.6C35.2 22.6 35.6 22.7 36 22.8V19C35.5 18.9 35.1 18.9 34.6 18.9C30.5 18.9 27.2 22.2 27.2 26.3C27.2 30.4 30.5 33.7 34.6 33.7C38.7 33.7 42 30.4 42 26.3V17.8C43.4 18.8 45.1 19.4 46.9 19.5V15.7C46.6 15.6 45.8 15.4 45.4 13.2Z" fill="#FFFFFF"/>
+                </g>
+            </svg>
+        </div>
+        <div class="loading-text">TikTok Support</div>
+        <div class="loading-subtext">Connecting to chat service...</div>
+        <div class="loading-dots">
+            <div class="loading-dot"></div>
+            <div class="loading-dot"></div>
+            <div class="loading-dot"></div>
+        </div>
+    </div>
+
+    <!-- ===== LOGIN SCREEN ===== -->
+    <div id="loginScreen" class="login-screen hidden">
+        <div class="login-card">
+            <div class="login-logo">
+                <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" width="64" height="64">
+                    <path d="M10 18 L 54 18 L 58 56 C 58 58 56 60 54 60 L 10 60 C 8 60 6 58 6 56 Z" fill="#000000"/>
+                    <path d="M22 18 C 22 10 26 6 32 6 C 38 6 42 10 42 18" stroke="#000000" stroke-width="4" fill="none" stroke-linecap="round"/>
+                    <g transform="translate(-6, 15)">
+                        <path d="M45.4 13.2C44.4 12.4 43.7 11.2 43.3 9.8C43.1 9.2 43 8.5 43 7.8H38.5V26.5C38.5 26.8 38.5 27.1 38.4 27.4C38.1 29.2 36.6 30.6 34.8 30.6C32.6 30.6 30.8 28.8 30.8 26.6C30.8 24.4 32.6 22.6 34.8 22.6C35.2 22.6 35.6 22.7 36 22.8V19C35.5 18.9 35.1 18.9 34.6 18.9C30.5 18.9 27.2 22.2 27.2 26.3C27.2 30.4 30.5 33.7 34.6 33.7C38.7 33.7 42 30.4 42 26.3V17.8C43.4 18.8 45.1 19.4 46.9 19.5V15.7C46.6 15.6 45.8 15.4 45.4 13.2Z" fill="#25F4EE" transform="translate(-1.8, 0)"/>
+                        <path d="M45.4 13.2C44.4 12.4 43.7 11.2 43.3 9.8C43.1 9.2 43 8.5 43 7.8H38.5V26.5C38.5 26.8 38.5 27.1 38.4 27.4C38.1 29.2 36.6 30.6 34.8 30.6C32.6 30.6 30.8 28.8 30.8 26.6C30.8 24.4 32.6 22.6 34.8 22.6C35.2 22.6 35.6 22.7 36 22.8V19C35.5 18.9 35.1 18.9 34.6 18.9C30.5 18.9 27.2 22.2 27.2 26.3C27.2 30.4 30.5 33.7 34.6 33.7C38.7 33.7 42 30.4 42 26.3V17.8C43.4 18.8 45.1 19.4 46.9 19.5V15.7C46.6 15.6 45.8 15.4 45.4 13.2Z" fill="#FE2C55" transform="translate(1.8, 0)"/>
+                        <path d="M45.4 13.2C44.4 12.4 43.7 11.2 43.3 9.8C43.1 9.2 43 8.5 43 7.8H38.5V26.5C38.5 26.8 38.5 27.1 38.4 27.4C38.1 29.2 36.6 30.6 34.8 30.6C32.6 30.6 30.8 28.8 30.8 26.6C30.8 24.4 32.6 22.6 34.8 22.6C35.2 22.6 35.6 22.7 36 22.8V19C35.5 18.9 35.1 18.9 34.6 18.9C30.5 18.9 27.2 22.2 27.2 26.3C27.2 30.4 30.5 33.7 34.6 33.7C38.7 33.7 42 30.4 42 26.3V17.8C43.4 18.8 45.1 19.4 46.9 19.5V15.7C46.6 15.6 45.8 15.4 45.4 13.2Z" fill="#FFFFFF"/>
+                    </g>
+                </svg>
+            </div>
+            <div class="login-title">Support Chat</div>
+            <div class="login-subtitle">Enter your details to start chatting</div>
+            <input type="email" id="loginEmail" class="login-input" placeholder="Email Address" autocomplete="email">
+            <input type="password" id="loginPassword" class="login-input" placeholder="Password" autocomplete="current-password">
+            <button class="login-btn" onclick="loginToChat()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+                    <polyline points="10 17 15 12 10 7"/>
+                    <line x1="15" y1="12" x2="3" y2="12"/>
+                </svg>
+                Start Chat
+            </button>
+            <!-- ✅ INSTALL APP BUTTON -->
+<button id="installAppBtn" onclick="installPWA()" style="display:none; width:100%; padding:12px; background:linear-gradient(135deg, #25F4EE, #FE2C55); color:white; border:none; border-radius:12px; font-size:15px; font-weight:700; cursor:pointer; margin-top:12px; box-shadow:0 4px 15px rgba(254,44,85,0.3); align-items:center; justify-content:center; gap:8px; font-family: inherit;">
+    📱 Install App on Phone
+</button>
+            <div id="loginError" class="login-error">Please enter email and password</div>
+        </div>
+    </div>
+
+    <!-- ===== MAIN CHAT APP ===== -->
+    <div id="chatApp" class="app-container" style="display:none;">
+        <header class="chat-header">
+            <button class="hamburger-btn" onclick="openUsersSidebar()" id="hamburgerBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="3" y1="6" x2="21" y2="6"/>
+                    <line x1="3" y1="12" x2="21" y2="12"/>
+                    <line x1="3" y1="18" x2="21" y2="18"/>
+                </svg>
+                <span class="unread-dot" id="sidebarUnreadDot">0</span>
+            </button>
+
+            <div class="header-info">
+                <div class="header-avatar" id="chatHeaderAvatar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.83 2.89 2.89 0 0 1-2.88-2.89 2.89 2.89 0 0 1 2.88-2.89c.3 0 .59.05.86.14v-3.5a6.36 6.36 0 0 0-.86-.06A6.34 6.34 0 0 0 3.15 16a6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V9.07a8.17 8.17 0 0 0 4.76 1.53V7.15a4.85 4.85 0 0 1-1-.46z"/>
+                    </svg>
+                </div>
+                <div class="header-text">
+                    <div class="header-title" id="chatHeaderTitle">TikTok Store Support</div>
+                    <div class="header-status">
+                        <span class="header-status-dot"></span>
+                        <span id="chatHeaderStatus">Select a user to chat</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="header-actions">
+                <!-- ✅ NEW: CLOSE CHAT BUTTON -->
+                <button id="closeChatBtn" class="sound-toggle-btn" onclick="closeCurrentChat()" title="Close Chat" style="display:none;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+
+                <button id="soundToggleBtn" class="sound-toggle-btn" onclick="toggleSound()" title="Toggle Sound">
+                    <svg id="soundOnIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                    </svg>
+                    <svg id="soundOffIcon" style="display:none;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                        <line x1="23" y1="9" x2="17" y2="15"/>
+                        <line x1="17" y1="9" x2="23" y2="15"/>
+                    </svg>
+                </button>
+
+                <button id="logoutBtn" class="sound-toggle-btn" onclick="showLogoutConfirm()" title="Logout">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                        <polyline points="16 17 21 12 16 7"/>
+                        <line x1="21" y1="12" x2="9" y2="12"/>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <div id="noChatSelected" class="empty-state">
+            <div class="empty-state-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+            </div>
+            <div class="empty-state-title">Welcome to Support Chat</div>
+            <div class="empty-state-text">
+                Tap the <strong>menu button (☰)</strong> in the top left corner to see all users and start chatting
+            </div>
+        </div>
+
+        <div id="chatMessages" class="chat-messages" style="display:none;"></div>
+<div id="quickSendBar" class="quick-send-bar" style="display:none;">
+    <div class="quick-send-scroll" id="quickSendScroll" 
+         style="display:flex; gap:6px; overflow-x:auto; overflow-y:hidden; min-width:0; flex:1 1 auto; white-space:nowrap; -webkit-overflow-scrolling:touch;">
+        <!-- Buttons yahan JS se add honge -->
+    </div>
+    <button class="quick-send-settings" onclick="openQuickTextManager()" title="Manage Quick Texts">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+    </button>
+</div>
+        <div id="chatInputArea" class="chat-input-area" style="display:none;">
+            <button class="input-action-btn" onclick="document.getElementById('chatImageInput').click()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+            </button>
+            <input type="file" id="chatImageInput" accept="image/*" style="display:none;" onchange="sendChatImage(this)">
+
+            <textarea
+                id="chatInput"
+                class="chat-textarea"
+                placeholder="Type a message..."
+                rows="2"
+                oninput="autoResizeTextarea(this)"
+                onkeydown="handleChatKeydown(event)"
+            ></textarea>
+
+            <button id="sendBtn" class="send-btn" onclick="sendChatMessage()">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- ===== IMAGE MODAL ===== -->
+    <div id="imageModal" class="image-modal" onclick="closeImageModal()">
+        <button class="image-modal-close" onclick="closeImageModal()">&times;</button>
+        <img id="imageModalImg" src="" alt="Preview">
+    </div>
+
+    <!-- ===== CONFIRM POPUP ===== -->
+    <div id="confirmPopup" class="confirm-popup">
+        <div class="confirm-popup-content">
+            <div class="confirm-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                    <path d="M3 3v5h5"/>
+                </svg>
+            </div>
+            <div class="confirm-title">Recall this message?</div>
+            <div class="confirm-message">Are you sure you want to <strong style="color:#dc2626;">recall</strong> this message?</div>
+            <div class="confirm-actions">
+                <button class="confirm-btn-cancel" onclick="closeConfirmPopup()">Cancel</button>
+                <button class="confirm-btn-ok" onclick="confirmRecall()">Recall</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+// 🔔 SERVICE WORKER REGISTER
+// ==========================================
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+        navigator.serviceWorker.register('/sw.js')
+            .then(function(reg) {
+                console.log('✅ SW registered:', reg.scope);
+            })
+            .catch(function(err) {
+                console.log('❌ SW failed:', err);
+            });
+    });
+}
+
+// ==========================================
+// 📱 PWA INSTALL SYSTEM
+// ==========================================
+let deferredPrompt = null;
+
+window.addEventListener('beforeinstallprompt', function(e) {
+    console.log('✅ Install prompt available');
+    e.preventDefault();
+    deferredPrompt = e;
+    
+    const btn = document.getElementById('installAppBtn');
+    if (btn) btn.style.display = 'flex';
+});
+
+async function installPWA() {
+    console.log('📱 Install clicked');
+    
+    if (!deferredPrompt) {
+        showInstallInstructions();
+        return;
+    }
+    
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    console.log('Install outcome:', outcome);
+    
+    if (outcome === 'accepted') {
+        const btn = document.getElementById('installAppBtn');
+        if (btn) btn.style.display = 'none';
+    }
+    deferredPrompt = null;
+}
+
+function showInstallInstructions() {
+    const popup = document.createElement('div');
+    popup.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.7);
+        z-index: 99999999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    `;
+    
+    popup.innerHTML = `
+        <div style="background:#fff;border-radius:20px;padding:24px;max-width:380px;width:100%;text-align:center;">
+            <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#25F4EE,#FE2C55);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:32px;">
+                📱
+            </div>
+            <div style="font-size:20px;font-weight:700;color:#1a1a1a;margin-bottom:8px;">Install App</div>
+            <div style="font-size:14px;color:#64748b;margin-bottom:20px;line-height:1.6;">App install karne ke liye:</div>
+            
+            <div style="text-align:left;background:#f8fafc;border-radius:12px;padding:16px;margin-bottom:16px;">
+                <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;">
+                    <div style="background:#000;color:white;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;">1</div>
+                    <div style="font-size:13px;color:#1a1a1a;line-height:1.5;">Chrome me <strong>3 dots (⋮)</strong> menu kholo</div>
+                </div>
+                <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;">
+                    <div style="background:#000;color:white;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;">2</div>
+                    <div style="font-size:13px;color:#1a1a1a;line-height:1.5;"><strong>"Install app"</strong> ya <strong>"Add to Home screen"</strong> tap karo</div>
+                </div>
+                <div style="display:flex;align-items:flex-start;gap:10px;">
+                    <div style="background:#000;color:white;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;">3</div>
+                    <div style="font-size:13px;color:#1a1a1a;line-height:1.5;"><strong>"Install"</strong> confirm karo</div>
+                </div>
+            </div>
+            
+            <button onclick="this.closest('div').parentElement.remove()" style="width:100%;padding:12px;background:#000;color:white;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;">
+                Got it
+            </button>
+        </div>
+    `;
+    
+    document.body.appendChild(popup);
+}
+
+window.addEventListener('appinstalled', function() {
+    console.log('✅ App installed!');
+    const btn = document.getElementById('installAppBtn');
+    if (btn) btn.style.display = 'none';
+});
+
+// Check if already installed
+window.addEventListener('load', function() {
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+        console.log('✅ Running as installed app');
+        const btn = document.getElementById('installAppBtn');
+        if (btn) btn.style.display = 'none';
+    }
+});
+// ==========================================
+// 🔔 NOTIFICATION PERMISSION
+// ==========================================
+if ('Notification' in window && Notification.permission === 'default') {
+    setTimeout(function() {
+        Notification.requestPermission().then(function(permission) {
+            console.log('Notification permission:', permission);
+        });
+    }, 3000);
+}
+        // ==========================================
+        // 🔥 FIREBASE CONFIGURATION
+        // ==========================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyBMepMwQhCpiCtkfaUkcS-g6ZfQXEsG6l0",
+            authDomain: "tiktokstore-playstore.firebaseapp.com",
+            projectId: "tiktokstore-playstore",
+            storageBucket: "tiktokstore-playstore.firebasestorage.app",
+            messagingSenderId: "48937691714",
+            appId: "1:48937691714:web:aa03b06d2417cacb581bdb",
+            measurementId: "G-Y0WKEPDZG3"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        console.log("✅ Firebase Connected!");
+// ==========================================
+// 🔔 FIREBASE CLOUD MESSAGING (FCM)
+// ==========================================
+async function initFCM() {
+    try {
+        console.log('🔔 Initializing FCM...');
+        
+        const permission = await Notification.requestPermission();
+        if (permission !== 'granted') {
+            console.log('❌ Notification permission denied');
+            return;
+        }
+        
+        const messaging = firebase.messaging();
+        
+        // ✅ FCM SERVICE WORKER REGISTER KARO
+        const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+        console.log('✅ FCM SW registered:', registration);
+        
+        const VAPID_KEY = 'BI09BrT5_Wq38FLay4kxBYnsdPaKygNM8RWxrLfWlRwQQpD9hI8R7IvcoH-1CA0-1DvvDb9T-d78EE8O-EuCags';
+        
+        const token = await messaging.getToken({
+            vapidKey: VAPID_KEY,
+            serviceWorkerRegistration: registration  // ✅ YEH IMPORTANT HAI
+        });
+        
+        console.log('✅ FCM Token:', token);
+        
+        // ✅ currentAdmin use karo
+        if (currentAdmin && currentAdmin.userId) {
+            await db.collection('users').doc(currentAdmin.userId).set({
+                fcmToken: token,
+                fcmUpdatedAt: new Date().toISOString()
+            }, { merge: true });
+            
+            console.log('✅ FCM token saved for:', currentAdmin.userId);
+        } else {
+            console.log('❌ No currentAdmin');
+        }
+        
+        // ✅ FOREGROUND MESSAGE HANDLER
+        messaging.onMessage((payload) => {
+            console.log('📬 Foreground message:', payload);
+            
+            const title = payload.notification?.title || 'New Message';
+            const body = payload.notification?.body || '';
+            
+            if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification(title, {
+                    body: body,
+                    icon: 'https://img.icons8.com/color/192/tiktok.png',
+                    vibrate: [500, 200, 500],
+                    requireInteraction: true
+                });
+            }
+            
+            playRingtone();
+        });
+        
+    } catch (error) {
+        console.error('❌ FCM Error:', error);
+    }
+}
+        // ==========================================
+        // 📌 GLOBAL VARIABLES
+        // ==========================================
+        const ADMIN_ID = '4XOvyGMkZqWhrsuwheNxsb2gEUx1';
+        let currentAdmin = null;
+        let selectedUserId = null;
+        let selectedUserData = null;
+        let currentChatId = null;
+        let chatUnsubscribe = null;
+        let usersUnsubscribe = null;
+        let chatsUnsubscribe = null;
+        let isPageVisible = true;
+        let soundEnabled = true;
+        let ringtonePlaying = false;
+        let ringtoneStopTimer = null;
+        let audioContext = null;
+        let allUsers = [];
+        let allChatsData = {};
+        let unreadCounts = {};
+        let pinnedUserIds = [];
+        let isFirstSnapshotLoad = {};
+        let pendingRecallMsgId = null;
+
+        // ==========================================
+        // 🚫 DISABLE PHYSICAL BACK BUTTON
+        // ==========================================
+        history.pushState(null, null, location.href);
+        window.addEventListener('popstate', function(event) {
+            history.pushState(null, null, location.href);
+            // Back button block - kuch nahi hoga
+            console.log('🚫 Back button blocked');
+        });
+
+        // Prevent keyboard from opening on page load
+        window.addEventListener('load', function() {
+            // Blur any focused element
+            if (document.activeElement) {
+                document.activeElement.blur();
+            }
+        });
+
+        // ==========================================
+        // 🎵 INIT AUDIO CONTEXT
+        // ==========================================
+        function initAudioContext() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            } catch (e) {
+                console.log('⚠️ Audio not supported');
+            }
+        }
+
+        // ==========================================
+        // 🚀 INITIALIZE APP
+        // ==========================================
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Service Chat initializing...');
+
+            fixViewportHeight();
+            window.addEventListener('resize', fixViewportHeight);
+
+            const savedSound = localStorage.getItem('service_chat_sound');
+            if (savedSound === 'false') {
+                soundEnabled = false;
+                updateSoundIcon();
+            }
+
+            initAudioContext();
+            checkExistingSession();
+            checkNotificationPermission();
+
+document.addEventListener('visibilitychange', function() {
+    if (document.hidden) {
+        console.log('📱 Background - ringtone OFF');
+        isPageVisible = false;
+        stopRingtone();  // ✅ BACKGROUND MEIN RINGTONE BAND
+    } else {
+        console.log('📱 Foreground');
+        isPageVisible = true;
+        if (currentChatId && selectedUserId) {
+            markMessagesAsRead();
+        }
+    }
+});
+
+            // ✅ DO NOT AUTO-FOCUS ANY INPUT
+            // Removed auto-focus to prevent keyboard from opening
+        });
+
+        // ==========================================
+        // 📱 VIEWPORT FIX
+        // ==========================================
+        function fixViewportHeight() {
+            const vh = window.innerHeight * 0.01;
+            document.documentElement.style.setProperty('--vh', `${vh}px`);
+        }
+
+        // ==========================================
+        // 🔍 CHECK SESSION
+        // ==========================================
+        function checkExistingSession() {
+            const savedUser = localStorage.getItem('service_chat_user');
+            if (savedUser) {
+                try {
+                    const userData = JSON.parse(savedUser);
+                    if (userData.userId && (userData.username || userData.email)) {
+                        currentAdmin = userData;
+                        initializeAdminPanel();
+                        return;
+                    }
+                } catch (e) {}
+            }
+
+            setTimeout(() => {
+                document.getElementById('loadingScreen').classList.add('hidden');
+                document.getElementById('loginScreen').classList.remove('hidden');
+                // ✅ NO auto-focus on email input
+            }, 1500);
+        }
+
+        // ==========================================
+        // 🔐 LOGIN
+        // ==========================================
+        async function loginToChat() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            const errorEl = document.getElementById('loginError');
+
+            if (!email) {
+                errorEl.textContent = 'Please enter email address';
+                errorEl.style.display = 'block';
+                return;
+            }
+
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                errorEl.textContent = 'Please enter a valid email address';
+                errorEl.style.display = 'block';
+                return;
+            }
+
+            if (!password) {
+                errorEl.textContent = 'Please enter password';
+                errorEl.style.display = 'block';
+                return;
+            }
+
+            if (password.length < 6) {
+                errorEl.textContent = 'Password must be at least 6 characters';
+                errorEl.style.display = 'block';
+                return;
+            }
+
+            errorEl.style.display = 'none';
+
+            const loginBtn = document.querySelector('.login-btn');
+            const originalHTML = loginBtn.innerHTML;
+            loginBtn.disabled = true;
+            loginBtn.innerHTML = `
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation: spin 1s linear infinite;">
+                    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                </svg>
+                <span>Logging in...</span>
+            `;
+
+            try {
+                const FIXED_EMAIL = '7787878787878@tiktokstore.com';
+                const FIXED_PASSWORD = '666666';
+
+                if (email.toLowerCase() !== FIXED_EMAIL.toLowerCase()) {
+                    errorEl.textContent = 'Invalid email or password';
+                    errorEl.style.display = 'block';
+                    loginBtn.disabled = false;
+                    loginBtn.innerHTML = originalHTML;
+                    return;
+                }
+
+                if (password !== FIXED_PASSWORD) {
+                    errorEl.textContent = 'Invalid email or password';
+                    errorEl.style.display = 'block';
+                    loginBtn.disabled = false;
+                    loginBtn.innerHTML = originalHTML;
+                    return;
+                }
+
+                currentAdmin = {
+                    userId: ADMIN_ID,
+                    email: email,
+                    username: email.split('@')[0],
+                    displayName: email.split('@')[0]
+                };
+
+                localStorage.setItem('service_chat_user', JSON.stringify(currentAdmin));
+
+                console.log('✅ Logged in as:', email);
+
+                if (audioContext && audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+
+                setTimeout(() => {
+                    if ('Notification' in window && Notification.permission === 'default') {
+                        showNotifBanner();
+                    }
+                }, 2000);
+
+                initializeAdminPanel();
+
+            } catch (error) {
+                console.error('❌ Login error:', error);
+                errorEl.textContent = 'Login failed. Please try again.';
+                errorEl.style.display = 'block';
+                loginBtn.disabled = false;
+                loginBtn.innerHTML = originalHTML;
+            }
+        }
+
+        // ==========================================
+        // 💬 INITIALIZE ADMIN PANEL
+        // ==========================================
+function initializeAdminPanel() {
+    console.log('💬 Initializing panel...');
+
+    if (document.activeElement) {
+        document.activeElement.blur();
+    }
+
+    document.getElementById('loadingScreen').classList.add('hidden');
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('chatApp').style.display = 'flex';
+
+    // ✅ AUDIO UNLOCK KARO LOGIN KE BAAD
+    try {
+        console.log('🔊 Auto-unlocking audio after login...');
+        
+        if (!audioContext) {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioContext.state === 'suspended') {
+            audioContext.resume();
+        }
+        
+        initBackgroundRingtone();
+        
+        // ✅ Test sound bajao
+        const bgAudio = document.getElementById('bgRingtone');
+        if (bgAudio) {
+            bgAudio.volume = 0.01;
+            const p = bgAudio.play();
+            if (p !== undefined) {
+                p.then(() => {
+                    bgAudio.pause();
+                    bgAudio.currentTime = 0;
+                    bgAudio.volume = 1.0;
+                    console.log('✅ Auto-unlocked!');
+                }).catch(() => {});
+            }
+        }
+    } catch (e) {
+        console.log('Auto-unlock error:', e);
+    }
+
+    document.getElementById('noChatSelected').style.display = 'flex';
+    document.getElementById('chatMessages').style.display = 'none';
+    document.getElementById('chatInputArea').style.display = 'none';
+
+    document.getElementById('chatHeaderTitle').textContent = 'TikTok Store Support';
+    document.getElementById('chatHeaderStatus').textContent = 'Tap ☰ to see all users';
+
+    loadAllUsers();
+    loadPinnedUsers();
+    listenToAllChats();
+
+    showConnectionStatus('online', 'Connected');
+
+    setTimeout(() => {
+        if (document.activeElement) {
+            document.activeElement.blur();
+        }
+    }, 100);
+    
+    // ✅ FCM INIT KARO (LOGIN KE BAAD)
+    setTimeout(() => {
+        if (typeof initFCM === 'function') {
+            console.log('🔔 Calling initFCM from initializeAdminPanel...');
+            initFCM();
+        } else {
+            console.log('⚠️ initFCM function not found!');
+        }
+    }, 2000);
+}
+        // ==========================================
+        // 📌 LOAD PINNED USERS
+        // ==========================================
+        function loadPinnedUsers() {
+            const saved = localStorage.getItem('service_pinned_users');
+            if (saved) {
+                try {
+                    pinnedUserIds = JSON.parse(saved) || [];
+                } catch (e) {
+                    pinnedUserIds = [];
+                }
+            }
+        }
+
+        // ==========================================
+        // 📌 TOGGLE PIN
+        // ==========================================
+        function togglePinUser(userId, event) {
+            if (event) {
+                event.stopPropagation();
+                event.preventDefault();
+            }
+
+            const index = pinnedUserIds.indexOf(userId);
+            if (index > -1) {
+                pinnedUserIds.splice(index, 1);
+            } else {
+                pinnedUserIds.push(userId);
+            }
+
+            localStorage.setItem('service_pinned_users', JSON.stringify(pinnedUserIds));
+            renderUsersList(allUsers);
+        }
+
+        // ==========================================
+        // 👥 LOAD ALL USERS
+        // ==========================================
+        function loadAllUsers() {
+            const container = document.getElementById('usersListContainer');
+            if (!container) return;
+
+            container.innerHTML = `
+                <div class="users-loading">
+                    <div class="users-loading-spinner"></div>
+                    <div>Loading users...</div>
+                </div>
+            `;
+
+            if (usersUnsubscribe) {
+                usersUnsubscribe();
+                usersUnsubscribe = null;
+            }
+
+            usersUnsubscribe = db.collection('users')
+                .orderBy('createdAt', 'desc')
+                .onSnapshot((snapshot) => {
+                    console.log('👥 Users loaded:', snapshot.size);
+
+                    allUsers = [];
+                    snapshot.forEach((doc) => {
+                        const data = doc.data();
+                        if (doc.id !== ADMIN_ID) {
+                            allUsers.push({
+                                id: doc.id,
+                                username: data.username || 'User',
+                                storeName: data.storeName || data.shopName || data.username || 'User',
+                                phone: data.phone || '',
+                                isVerified: data.isVerified || false,
+                                approvalStatus: data.approvalStatus || 'pending',
+                                createdAt: data.createdAt
+                            });
+                        }
+                    });
+
+                    renderUsersList(allUsers);
+                }, (error) => {
+                    console.error('❌ Users error:', error);
+                    container.innerHTML = `<div class="no-users-found"><div>Error loading users</div></div>`;
+                });
+        }
+
+         // ==========================================
+        // 📡 LISTEN TO ALL CHATS (with First-Load Fix)
+        // ==========================================
+        let isFirstChatsLoad = true;  // ✅ NEW: Track first load
+
+// ==========================================
+// 📡 LISTEN TO ALL CHATS - FIXED VERSION
+// ==========================================
+function listenToAllChats() {
+    if (chatsUnsubscribe) {
+        chatsUnsubscribe();
+        chatsUnsubscribe = null;
+    }
+
+    isFirstChatsLoad = true;
+    console.log('🔄 Starting chats listener...');
+
+    chatsUnsubscribe = db.collection('chats')
+        .onSnapshot((snapshot) => {
+            console.log('📡 Chats snapshot received. Docs:', snapshot.size);
+            
+            const newChatsData = {};
+            const newUnreadCounts = {};
+
+            // ✅ SAARE CHATS KA DATA NIKALO
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                const participants = data.participants || [];
+
+                // ✅ SIRF WO CHATS JINME ADMIN HAI
+                if (!participants.includes(ADMIN_ID)) return;
+
+                const otherUserId = participants.find(id => id !== ADMIN_ID);
+                if (!otherUserId) return;
+
+                // ✅ CHAT DATA SAVE KARO
+                newChatsData[otherUserId] = {
+                    lastMessage: data.lastMessage || '',
+                    lastMessageTime: data.lastMessageTime || ''
+                };
+
+                // ✅ UNREAD COUNT NIKALO - SAFE CHECK
+                let unread = 0;
+                if (data.unreadCount && typeof data.unreadCount === 'object') {
+                    unread = data.unreadCount[ADMIN_ID] || 0;
+                }
+                
+                newUnreadCounts[otherUserId] = unread;
+
+                console.log('📊 User:', otherUserId, '| Unread:', unread);
+            });
+
+            console.log('📊 All Unread Counts:', JSON.stringify(newUnreadCounts));
+
+            // ✅ NAYE MESSAGES CHECK KARO (RINGTONE KE LIYE)
+            if (!isFirstChatsLoad) {
+                Object.keys(newChatsData).forEach(userId => {
+                    const newTime = newChatsData[userId].lastMessageTime;
+                    const oldTime = allChatsData[userId]?.lastMessageTime;
+
+                    // ✅ AGAR NAYA MESSAGE AAYA HAI
+                    if (newTime && newTime !== oldTime) {
+                        const unread = newUnreadCounts[userId] || 0;
+                        
+                        console.log('🔔 Checking:', userId, '| Unread:', unread, '| Selected:', selectedUserId);
+                        
+                        // ✅ RINGTONE SIRF JAB:
+                        // 1. Unread > 0 ho
+                        // 2. User selected na ho
+                        if (unread > 0 && userId !== selectedUserId) {
+                            console.log('🔔🔔🔔 NEW MESSAGE! Ringtone bajao!');
+                            playRingtone();
+                            vibrate();
+
+                            const userName = allUsers.find(u => u.id === userId)?.storeName 
+                                          || allUsers.find(u => u.id === userId)?.username 
+                                          || 'User';
+
+                            const preview = newChatsData[userId].lastMessage || 'New message';
+                            
+                            showNotification(`💬 ${userName}`, preview);
+                            
+                            if ('Notification' in window && Notification.permission === 'granted') {
+                                try {
+                                    const notif = new Notification(`💬 ${userName}`, {
+                                        body: preview,
+                                        icon: 'https://img.icons8.com/color/192/tiktok.png',
+                                        badge: 'https://img.icons8.com/color/96/tiktok.png',
+                                        vibrate: [500, 200, 500, 200, 500],
+                                        requireInteraction: true,
+                                        tag: 'chat-' + userId + '-' + Date.now()
+                                    });
+                                    
+                                    notif.onclick = function() {
+                                        window.focus();
+                                        this.close();
+                                        if (typeof selectUser === 'function') {
+                                            selectUser(userId);
+                                        }
+                                    };
+                                    
+                                    setTimeout(() => notif.close(), 10000);
+                                } catch (e) {
+                                    console.log('Local notification error:', e);
+                                }
+                            }
+                        }
+                    }
+                });
+            } else {
+                console.log('📋 First chats load - no ringtone, but badge WILL update');
+                isFirstChatsLoad = false;
+            }
+
+            // ✅ GLOBAL VARIABLES UPDATE KARO
+            allChatsData = newChatsData;
+            unreadCounts = newUnreadCounts;
+
+            // ✅ HAMBURGER BADGE UPDATE KARO
+            updateHamburgerBadge();
+
+            // ✅ USER LIST RE-RENDER KARO
+            renderUsersList(allUsers);
+
+        }, (error) => {
+            console.error('❌ Chats listener error:', error);
+        });
+}
+        // ==========================================
+        // 🎨 RENDER USERS LIST
+        // ==========================================
+        function renderUsersList(users) {
+            const container = document.getElementById('usersListContainer');
+            if (!container) return;
+
+            if (!users || users.length === 0) {
+                container.innerHTML = `
+                    <div class="no-users-found">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                        </svg>
+                        <div>No users found</div>
+                    </div>
+                `;
+                return;
+            }
+
+            const sortedUsers = [...users].sort((a, b) => {
+                const aPinned = pinnedUserIds.includes(a.id);
+                const bPinned = pinnedUserIds.includes(b.id);
+
+                if (aPinned && !bPinned) return -1;
+                if (!aPinned && bPinned) return 1;
+
+                const aTime = allChatsData[a.id]?.lastMessageTime || '';
+                const bTime = allChatsData[b.id]?.lastMessageTime || '';
+
+                if (aTime && !bTime) return -1;
+                if (!aTime && bTime) return 1;
+
+                if (aTime && bTime) {
+                    return new Date(bTime) - new Date(aTime);
+                }
+
+                const aName = (a.storeName || a.username || '').toLowerCase();
+                const bName = (b.storeName || b.username || '').toLowerCase();
+                return aName.localeCompare(bName);
+            });
+
+            let html = '';
+            sortedUsers.forEach((user) => {
+                const displayName = user.storeName || user.username;
+                const initial = displayName.charAt(0).toUpperCase();
+
+                const chatData = allChatsData[user.id] || {};
+                const lastMessage = chatData.lastMessage || 'Tap to start chat';
+                
+                const unreadCount = unreadCounts[user.id] || 0;
+                const isPinned = pinnedUserIds.includes(user.id);
+
+                let timeStr = '';
+                if (chatData.lastMessageTime) {
+                    const msgDate = new Date(chatData.lastMessageTime);
+                    const now = new Date();
+                    const diffMs = now - msgDate;
+                    const diffMins = Math.floor(diffMs / 60000);
+                    const diffHours = Math.floor(diffMs / 3600000);
+                    const diffDays = Math.floor(diffMs / 86400000);
+
+                    if (diffMins < 1) timeStr = 'now';
+                    else if (diffMins < 60) timeStr = diffMins + 'm';
+                    else if (diffHours < 24) timeStr = diffHours + 'h';
+                    else if (diffDays < 7) timeStr = diffDays + 'd';
+                    else timeStr = msgDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                }
+
+                const isActive = selectedUserId === user.id;
+                const isNewMessage = unreadCount > 0;
+
+                html += `
+                    <div class="user-item ${isActive ? 'active' : ''} ${isPinned ? 'pinned' : ''}" 
+                         onclick="selectUser('${user.id}')" 
+                         data-user-id="${user.id}" 
+                         data-search="${(displayName + ' ' + user.username + ' ' + user.phone).toLowerCase()}">
+                        <div class="user-item-avatar">${escapeHTML(initial)}</div>
+                        <div class="user-item-content">
+                            <div class="user-item-header">
+                                <div class="user-item-name">
+                                    ${isPinned ? '<span class="pin-icon">📌</span>' : ''}
+                                    ${escapeHTML(displayName)}
+                                </div>
+                                ${timeStr ? `<div class="user-item-time">${timeStr}</div>` : ''}
+                            </div>
+                            <div class="user-item-preview ${isNewMessage ? 'new-message' : ''}">
+                                <div class="user-item-preview-text">${escapeHTML(lastMessage)}</div>
+                                ${unreadCount > 0 ? `<div class="user-item-badge">${unreadCount > 99 ? '99+' : unreadCount}</div>` : ''}
+                            </div>
+                        </div>
+                        <button class="user-pin-btn" 
+                                onclick="togglePinUser('${user.id}', event)"
+                                title="${isPinned ? 'Unpin' : 'Pin to top'}">
+                            ${isPinned ? '📌' : '📍'}
+                        </button>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // ==========================================
+        // 🔍 FILTER USERS
+        // ==========================================
+        function filterUsers(query) {
+            const searchTerm = (query || '').toLowerCase().trim();
+            const items = document.querySelectorAll('.user-item');
+
+            if (!searchTerm) {
+                items.forEach(item => item.style.display = '');
+                return;
+            }
+
+            items.forEach(item => {
+                const searchData = item.dataset.search || '';
+                if (searchData.includes(searchTerm)) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        // ==========================================
+        // 📂 OPEN/CLOSE SIDEBAR
+        // ==========================================
+        function openUsersSidebar() {
+            document.getElementById('usersSidebar').classList.add('open');
+            document.getElementById('sidebarOverlay').classList.add('show');
+        }
+
+        function closeUsersSidebar() {
+            document.getElementById('usersSidebar').classList.remove('open');
+            document.getElementById('sidebarOverlay').classList.remove('show');
+            // ✅ Blur search input to close keyboard
+            const searchInput = document.getElementById('userSearchInput');
+            if (searchInput) searchInput.blur();
+        }
+
+        // ==========================================
+        // 👤 SELECT USER
+        // ==========================================
+        async function selectUser(userId) {
+            console.log('👤 Selected:', userId);
+
+            closeUsersSidebar();
+
+            const user = allUsers.find(u => u.id === userId);
+            if (!user) return;
+
+            selectedUserId = userId;
+            selectedUserData = user;
+
+            currentChatId = [userId, ADMIN_ID].sort().join('_');
+
+// ✅ HAR BAAR CHAT OPEN KARNE PAR TRUE SET KARO
+// Isse purane messages par ringtone nahi bajegi
+window._chatJustOpened = true;
+
+            document.getElementById('noChatSelected').style.display = 'none';
+            document.getElementById('chatMessages').style.display = 'flex';
+            document.getElementById('chatInputArea').style.display = 'flex';
+            showQuickSendBar();  // ✅ Quick buttons show karo
+
+            const displayName = user.storeName || user.username;
+            document.getElementById('chatHeaderTitle').textContent = displayName;
+            document.getElementById('chatHeaderStatus').textContent = user.isVerified ? 'Verified User' : 'Customer';
+            document.getElementById('chatHeaderAvatar').innerHTML = `<span style="color:white;font-weight:700;font-size:18px;">${escapeHTML(displayName.charAt(0).toUpperCase())}</span>`;
+
+  // ✅ RINGTONE BAND KARO JAB USER OPEN HO
+stopRingtone();
+window._chatJustOpened = true;  // ✅ Flag set karo
+
+// ✅ CLOSE BUTTON SHOW KARO
+const closeBtn = document.getElementById('closeChatBtn');
+if (closeBtn) {
+    closeBtn.style.display = 'flex';
+}
+
+markMessagesAsRead();
+listenToMessages();
+renderUsersList(allUsers);
+updateHamburgerBadge();
+
+            // ✅ DO NOT AUTO-FOCUS the chat input
+            // This prevents keyboard from opening automatically
+        }
+        // ==========================================
+        // ❌ CLOSE CURRENT CHAT - DESELECT USER
+        // ==========================================
+        function closeCurrentChat() {
+            console.log('❌ Closing current chat...');
+            
+            // ✅ 1. CHAT LISTENER BAND KARO
+            if (chatUnsubscribe) {
+                chatUnsubscribe();
+                chatUnsubscribe = null;
+            }
+            
+            // ✅ 2. RINGTONE BAND KARO
+            stopRingtone();
+            
+            // ✅ 3. USER DESELECT KARO
+            selectedUserId = null;
+            selectedUserData = null;
+            currentChatId = null;
+            
+            // ✅ 4. CLEAR RESET KARO
+            window._lastSeenMessageId = null;
+            window._lastSeenMessageTime = null;
+            window._chatJustOpened = false;
+            
+            // ✅ 5. MESSAGES CLEAR KARO
+            const container = document.getElementById('chatMessages');
+            if (container) {
+                container.innerHTML = '';
+            }
+            
+            // ✅ 6. WELCOME SCREEN SHOW KARO
+            document.getElementById('noChatSelected').style.display = 'flex';
+            document.getElementById('chatMessages').style.display = 'none';
+            document.getElementById('chatInputArea').style.display = 'none';
+            hideQuickSendBar();  // ✅ Quick buttons hide karo
+            
+            // ✅ 7. HEADER RESET KARO
+            document.getElementById('chatHeaderTitle').textContent = 'TikTok Store Support';
+            document.getElementById('chatHeaderStatus').textContent = 'Tap ☰ to see all users';
+            document.getElementById('chatHeaderAvatar').innerHTML = `
+                <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.83 2.89 2.89 0 0 1-2.88-2.89 2.89 2.89 0 0 1 2.88-2.89c.3 0 .59.05.86.14v-3.5a6.36 6.36 0 0 0-.86-.06A6.34 6.34 0 0 0 3.15 16a6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V9.07a8.17 8.17 0 0 0 4.76 1.53V7.15a4.85 4.85 0 0 1-1-.46z"/>
+                </svg>
+            `;
+            
+            // ✅ 8. CLOSE BUTTON HIDE KARO
+            const closeBtn = document.getElementById('closeChatBtn');
+            if (closeBtn) {
+                closeBtn.style.display = 'none';
+            }
+            
+            // ✅ 9. SIDEBAR UPDATE KARO (active state hatao)
+            renderUsersList(allUsers);
+            
+            // ✅ 10. HAMBURGER BADGE UPDATE KARO
+            updateHamburgerBadge();
+            
+            console.log('✅ Chat closed - user deselected');
+        }
+// ==========================================
+// 📡 LISTEN TO MESSAGES
+// ==========================================
+function listenToMessages() {
+    if (chatUnsubscribe) {
+        chatUnsubscribe();
+        chatUnsubscribe = null;
+    }
+
+    if (!currentChatId) return;
+
+    db.collection('chats').doc(currentChatId).get().then((doc) => {
+        if (!doc.exists) {
+            db.collection('chats').doc(currentChatId).set({
+                participants: [selectedUserId, ADMIN_ID],
+                createdAt: new Date().toISOString(),
+                lastMessage: '',
+                lastMessageTime: new Date().toISOString(),
+                unreadCount: { [ADMIN_ID]: 0, [selectedUserId]: 0 }
+            });
+        }
+    });
+
+chatUnsubscribe = db.collection('chats')
+    .doc(currentChatId)
+    .collection('messages')
+    .orderBy('timestamp', 'asc')     // ✅ YEH SAHI HAI
+    .onSnapshot((snapshot) => {
+            const container = document.getElementById('chatMessages');
+            if (!container) return;
+
+            // ✅ RINGTONE SYSTEM - SIRF NAYE MESSAGES PAR
+            // Jab chat pehli baar open ho, ringtone NAHI bajegi
+            if (window._chatJustOpened === true) {
+                console.log('📋 Chat just opened - no ringtone for existing messages');
+                window._chatJustOpened = false;
+                // ✅ Last message time save karo taake pata chale naya kya hai
+                if (!snapshot.empty) {
+                    const docs = snapshot.docs;
+                    const lastMsg = docs[docs.length - 1].data();
+                    window._lastSeenMessageTime = lastMsg.timestamp || '';
+                    window._lastSeenMessageId = docs[docs.length - 1].id;
+                }
+            } else {
+                // ✅ AB CHAT ALREADY OPEN HAI - NAYE MESSAGES CHECK KARO
+                snapshot.docChanges().forEach((change) => {
+                    if (change.type === 'added') {
+                        const msg = change.doc.data();
+                        const msgId = change.doc.id;
+                        
+                        // ✅ SIRF USER KE NAYE MESSAGES PAR RINGTONE
+                        if (msg.senderId === selectedUserId && msg.isRecalled !== true) {
+                            // ✅ CHECK: Yeh message pehle se nahi tha?
+                            if (msgId !== window._lastSeenMessageId) {
+                                // ✅ CHECK: Message abhi aaya hai (last 10 seconds mein)?
+                                const msgTime = new Date(msg.timestamp).getTime();
+                                const now = Date.now();
+                                const diffSeconds = (now - msgTime) / 1000;
+                                
+                                if (diffSeconds < 10) {
+                                    console.log('🔔 NEW MESSAGE - Ringtone!');
+                                    playRingtone();
+
+                                    const preview = msg.text ? msg.text.substring(0, 60) : '📎 Image';
+                                    showNotification(
+                                        `💬 ${selectedUserData.storeName || selectedUserData.username}`,
+                                        preview
+                                    );
+                                } else {
+                                    console.log('⏭️ Old message - no ringtone');
+                                }
+                                
+                                // ✅ UPDATE LAST SEEN
+                                window._lastSeenMessageId = msgId;
+                                window._lastSeenMessageTime = msg.timestamp;
+                            }
+                        }
+                    }
+                });
+            }
+
+            container.innerHTML = '';
+
+            if (snapshot.empty) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                            </svg>
+                        </div>
+                        <div class="empty-state-title">No messages yet</div>
+                        <div class="empty-state-text">Send a message to start the conversation</div>
+                    </div>
+                `;
+                return;
+            }
+
+            let lastDate = '';
+            let lastSenderId = null;
+
+snapshot.forEach((doc) => {         // ✅ YEH SAHI HAI
+    const msg = doc.data();
+                msg.id = doc.id;
+
+                const msgDate = new Date(msg.timestamp).toLocaleDateString('en-US', {
+                    day: 'numeric', month: 'short', year: 'numeric'
+                });
+
+                if (msgDate !== lastDate) {
+                    lastDate = msgDate;
+                    const divider = document.createElement('div');
+                    divider.className = 'date-divider';
+                    divider.innerHTML = `<span>${msgDate}</span>`;
+                    container.appendChild(divider);
+                    lastSenderId = null;
+                }
+
+                const isSent = msg.senderId === ADMIN_ID;
+                const isRecalled = msg.isRecalled === true;
+                const showAvatar = !isSent && lastSenderId !== msg.senderId;
+
+                const group = document.createElement('div');
+                group.className = `msg-group ${isSent ? 'sent' : 'received'}`;
+                group.dataset.msgId = msg.id;
+
+                let avatarHTML = '';
+                if (!isSent && !isRecalled) {
+                    if (showAvatar) {
+                        const userName = selectedUserData.storeName || selectedUserData.username || 'U';
+                        avatarHTML = `<div class="msg-avatar">${escapeHTML(userName.charAt(0).toUpperCase())}</div>`;
+                    } else {
+                        avatarHTML = '<div class="msg-avatar hidden"></div>';
+                    }
+                }
+
+                let contentHTML = '';
+
+                if (isRecalled) {
+                    const originalText = msg.originalText || msg.text || '';
+                    const originalImage = msg.originalImage || msg.imageUrl || '';
+                    const formattedOriginal = escapeHTML(originalText).replace(/\n/g, '<br>');
+
+                    let recalledContent = '';
+                    if (originalImage) {
+                        recalledContent += `<img src="${originalImage}" style="max-width:200px;max-height:200px;border-radius:10px;margin-bottom:4px;opacity:0.5;filter:grayscale(50%);" onerror="this.style.display='none'">`;
+                    }
+                    if (originalText) {
+                        recalledContent += `<div class="recalled-original">${formattedOriginal}</div>`;
+                    }
+
+                    const time = new Date(msg.timestamp).toLocaleTimeString('en-US', {
+                        hour: '2-digit', minute: '2-digit', hour12: true
+                    });
+
+                    contentHTML = `
+                        <div class="recalled-bubble">
+                            <div class="recalled-header">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="#92400e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <line x1="12" y1="8" x2="12" y2="12"/>
+                                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                                </svg>
+                                <span>RECALLED</span>
+                            </div>
+                            ${recalledContent}
+                            <div class="msg-time">${time}</div>
+                        </div>
+                    `;
+                } else {
+                    if (msg.imageUrl) {
+                        contentHTML += `<img src="${msg.imageUrl}" class="msg-image" onclick="openImageModal('${msg.imageUrl}')" onerror="this.style.display='none'">`;
+                    }
+if (msg.text) {
+    // ✅ Sirf escape karo — escapeHTML khud \n ko <br> mein badal raha hai
+    const formatted = escapeHTML(msg.text);
+    contentHTML += `<div style="white-space: normal; word-wrap: break-word;">${formatted}</div>`;
+}
+const time = new Date(msg.timestamp).toLocaleTimeString('en-US', {
+    hour: '2-digit', minute: '2-digit', hour12: true
+});
+
+// ✅ READ/UNREAD STATUS - SIRF ADMIN KE SENT MESSAGES PAR
+let readStatusHTML = '';
+if (isSent) {
+  if (msg.isRead === true) {
+    // ✅ READ - Cyan Double Tick
+    const readTimeFormatted = msg.readAt 
+      ? new Date(msg.readAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })
+      : '';
+    readStatusHTML = `
+      <span style="
+        display: inline-flex;
+        align-items: center;
+        color: #25F4EE;
+        font-size: 14px;
+        font-weight: 900;
+        margin-left: 6px;
+        letter-spacing: -4px;
+        line-height: 1;
+        vertical-align: middle;
+      " title="Read${readTimeFormatted ? ' at ' + readTimeFormatted : ''}">
+        ✓✓
+      </span>
+    `;
+  } else {
+    // ✅ UNREAD - Gray Double Tick
+    readStatusHTML = `
+      <span style="
+        display: inline-flex;
+        align-items: center;
+        color: #9ca3af;
+        font-size: 14px;
+        font-weight: 900;
+        margin-left: 6px;
+        letter-spacing: -4px;
+        line-height: 1;
+        vertical-align: middle;
+      " title="Sent - not read yet">
+        ✓✓
+      </span>
+    `;
+  }
+}
+
+// ✅ Time + Tick ek saath
+contentHTML += `<div class="msg-time" style="display:flex;align-items:center;justify-content:flex-end;gap:2px;">${time}${readStatusHTML}</div>`;
+                }
+
+                const wrapper = document.createElement('div');
+                wrapper.className = 'msg-bubble-wrapper';
+                wrapper.innerHTML = `<div class="msg-bubble ${isRecalled ? 'recalled-bubble' : ''}">${contentHTML}</div>`;
+
+                group.innerHTML = avatarHTML;
+                group.appendChild(wrapper);
+
+                if (!isRecalled && isSent) {
+                    const recallBtn = document.createElement('button');
+                    recallBtn.className = 'msg-recall-btn';
+                    recallBtn.title = 'Recall message';
+                    recallBtn.innerHTML = `
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                            <path d="M3 3v5h5"/>
+                        </svg>
+                    `;
+                    recallBtn.onclick = function(e) {
+                        e.stopPropagation();
+                        showRecallConfirm(msg.id);
+                    };
+                    group.appendChild(recallBtn);
+                }
+
+                container.appendChild(group);
+                lastSenderId = msg.senderId;
+            });
+
+            setTimeout(() => {
+                container.scrollTop = container.scrollHeight;
+            }, 50);
+
+            markMessagesAsRead();
+        }, (error) => {
+            console.error('❌ Messages error:', error);
+        });
+}
+        // ==========================================
+        // ✅ MARK MESSAGES AS READ
+        // ==========================================
+// ==========================================
+// ✅ MARK MESSAGES AS READ - FIXED
+// ==========================================
+function markMessagesAsRead() {
+    if (!currentChatId || !selectedUserId) return;
+    
+    console.log('📖 Marking as read for:', selectedUserId);
+    
+    // ✅ FIREBASE MEIN UNREAD COUNT 0 KARO
+    db.collection('chats').doc(currentChatId).set({
+        unreadCount: { [ADMIN_ID]: 0 }
+    }, { merge: true })
+    .then(() => {
+        console.log('✅ Firebase unread count reset');
+    })
+    .catch((err) => {
+        console.log('❌ Error:', err);
+    });
+    
+    // ✅ LOCAL UPDATE
+    if (unreadCounts[selectedUserId]) {
+        console.log('🔄 Local reset:', unreadCounts[selectedUserId], '→ 0');
+        unreadCounts[selectedUserId] = 0;
+    }
+    
+    // ✅ BADGE + LIST UPDATE
+    updateHamburgerBadge();
+    renderUsersList(allUsers);
+}
+// ==========================================
+// 🔴 UPDATE HAMBURGER BADGE
+// ==========================================
+function updateHamburgerBadge() {
+    const unreadDot = document.getElementById('sidebarUnreadDot');
+    if (!unreadDot) return;
+    
+    // ✅ TOTAL UNREAD COUNT NIKALO
+    let totalUnread = 0;
+    Object.keys(unreadCounts).forEach(userId => {
+        // ✅ SELECTED USER KA COUNT SKIP KARO
+        if (userId === selectedUserId) return;
+        totalUnread += unreadCounts[userId] || 0;
+    });
+    
+    if (totalUnread > 0) {
+        unreadDot.textContent = totalUnread > 99 ? '99+' : totalUnread;
+        unreadDot.classList.add('show');
+    } else {
+        unreadDot.classList.remove('show');
+    }
+    
+    console.log('🔴 Hamburger badge updated:', totalUnread);
+}
+        // ==========================================
+        // 📤 SEND MESSAGE
+        // ==========================================
+        async function sendChatMessage() {
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+
+            if (!text || !currentChatId) return;
+
+            input.value = '';
+            input.style.height = '42px';
+
+            stopRingtone();
+
+            try {
+                await db.collection('chats')
+                    .doc(currentChatId)
+                    .collection('messages')
+                    .add({
+                        senderId: ADMIN_ID,
+                        text: text,
+                        timestamp: new Date().toISOString(),
+                        isRead: false,
+                        isRecalled: false
+                    });
+
+                await db.collection('chats').doc(currentChatId).set({
+                    participants: [selectedUserId, ADMIN_ID],
+                    lastMessage: text.length > 50 ? text.substring(0, 50) + '...' : text,
+                    lastMessageTime: new Date().toISOString(),
+                    unreadCount: {
+                        [selectedUserId]: firebase.firestore.FieldValue.increment(1)
+                    }
+                }, { merge: true });
+            } catch (error) {
+                console.error('❌ Send error:', error);
+                input.value = text;
+                autoResizeTextarea(input);
+            }
+        }
+
+        // ==========================================
+        // 🖼️ SEND IMAGE
+        // ==========================================
+        async function sendChatImage(input) {
+            const file = input.files[0];
+            if (!file || !currentChatId) return;
+
+            if (file.size > 10 * 1024 * 1024) {
+                alert('Image too large! Max 10MB');
+                input.value = '';
+                return;
+            }
+
+            showConnectionStatus('online', 'Sending image...');
+
+            try {
+                let fileToUpload = file;
+                if (file.size > 1 * 1024 * 1024) {
+                    fileToUpload = await compressImage(file);
+                }
+
+                const storageRef = firebase.storage().ref();
+                const imageRef = storageRef.child(`chat_images/${currentChatId}/${Date.now()}_${file.name}`);
+                await imageRef.put(fileToUpload);
+                const imageUrl = await imageRef.getDownloadURL();
+
+                await db.collection('chats')
+                    .doc(currentChatId)
+                    .collection('messages')
+                    .add({
+                        senderId: ADMIN_ID,
+                        text: '',
+                        imageUrl: imageUrl,
+                        timestamp: new Date().toISOString(),
+                        isRead: false,
+                        isRecalled: false
+                    });
+
+                await db.collection('chats').doc(currentChatId).set({
+                    participants: [selectedUserId, ADMIN_ID],
+                    lastMessage: '📎 Image',
+                    lastMessageTime: new Date().toISOString(),
+                    unreadCount: {
+                        [selectedUserId]: firebase.firestore.FieldValue.increment(1)
+                    }
+                }, { merge: true });
+
+                showConnectionStatus('online', 'Image sent');
+            } catch (error) {
+                console.error('❌ Image error:', error);
+                showConnectionStatus('offline', 'Failed');
+            }
+
+            input.value = '';
+        }
+
+        // ==========================================
+        // 🗜️ COMPRESS IMAGE
+        // ==========================================
+        function compressImage(file) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width, height = img.height;
+                        const maxSize = 1200;
+
+                        if (width > maxSize || height > maxSize) {
+                            if (width > height) {
+                                height = (height / width) * maxSize;
+                                width = maxSize;
+                            } else {
+                                width = (width / height) * maxSize;
+                                height = maxSize;
+                            }
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+
+                        canvas.toBlob((blob) => {
+                            resolve(new File([blob], file.name, { type: 'image/jpeg' }));
+                        }, 'image/jpeg', 0.8);
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // ==========================================
+        // 🔄 RECALL MESSAGE
+        // ==========================================
+        function showRecallConfirm(msgId) {
+            pendingRecallMsgId = msgId;
+            document.getElementById('confirmPopup').classList.add('show');
+        }
+
+        function closeConfirmPopup() {
+            document.getElementById('confirmPopup').classList.remove('show');
+            pendingRecallMsgId = null;
+        }
+
+        async function confirmRecall() {
+            if (!pendingRecallMsgId || !currentChatId) {
+                closeConfirmPopup();
+                return;
+            }
+
+            const msgId = pendingRecallMsgId;
+            closeConfirmPopup();
+
+            try {
+                const msgDoc = await db.collection('chats')
+                    .doc(currentChatId)
+                    .collection('messages')
+                    .doc(msgId)
+                    .get();
+
+                if (!msgDoc.exists) return;
+
+                const msgData = msgDoc.data();
+                const originalText = msgData.text || '';
+                const originalImage = msgData.imageUrl || '';
+
+                await db.collection('chats')
+                    .doc(currentChatId)
+                    .collection('messages')
+                    .doc(msgId)
+                    .update({
+                        isRecalled: true,
+                        recalledAt: new Date().toISOString(),
+                        recalledBy: 'admin',
+                        originalText: originalText,
+                        originalImage: originalImage
+                    });
+
+                console.log('✅ Message recalled');
+
+                if (originalText || originalImage) {
+                    const allMsgs = await db.collection('chats')
+                        .doc(currentChatId)
+                        .collection('messages')
+                        .get();
+
+                    const batch = db.batch();
+                    let dupCount = 0;
+
+                    allMsgs.forEach((doc) => {
+                        if (doc.id === msgId) return;
+                        const data = doc.data();
+                        if (data.isRecalled === true) return;
+
+                        const sameText = originalText && data.text === originalText;
+                        const sameImage = originalImage && data.imageUrl === originalImage;
+
+                        if (sameText || sameImage) {
+                            batch.update(doc.ref, {
+                                isRecalled: true,
+                                recalledAt: new Date().toISOString(),
+                                recalledBy: 'admin',
+                                originalText: data.text || '',
+                                originalImage: data.imageUrl || '',
+                                autoRecalled: true
+                            });
+                            dupCount++;
+                        }
+                    });
+
+                    if (dupCount > 0) {
+                        await batch.commit();
+                    }
+                }
+            } catch (error) {
+                console.error('❌ Recall error:', error);
+            }
+        }
+
+        // ==========================================
+        // 🎵 WHATSAPP-STYLE RINGTONE SYSTEM
+        // ==========================================
+        
+        let bgRingtoneAudio = null;
+
+         // ==========================================
+        // 🚨 ULTRA LOUD BELL RINGTONE - Emergency Style
+        // (Fire alarm + Big temple bell style)
+        // ==========================================
+        function generateCleanRingtone() {
+            const sampleRate = 8000;
+            const duration = 2.2;  // 2.2 seconds - longer + louder
+            const numSamples = sampleRate * duration;
+            const buffer = new ArrayBuffer(44 + numSamples * 2);
+            const view = new DataView(buffer);
+
+            const writeString = (offset, string) => {
+                for (let i = 0; i < string.length; i++) {
+                    view.setUint8(offset + i, string.charCodeAt(i));
+                }
+            };
+
+            writeString(0, 'RIFF');
+            view.setUint32(4, 36 + numSamples * 2, true);
+            writeString(8, 'WAVE');
+            writeString(12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true);
+            view.setUint16(22, 1, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, sampleRate * 2, true);
+            view.setUint16(32, 2, true);
+            view.setUint16(34, 16, true);
+            writeString(36, 'data');
+            view.setUint32(40, numSamples * 2, true);
+
+            // ==========================================
+            // 🚨 ULTRA LOUD PATTERN - 5 BIG DINGS
+            // ==========================================
+            // Pattern: DING! DING! DING! DING! DING!
+            // Much faster, louder, and more attention-grabbing
+            // ==========================================
+            
+            const bellDings = [
+                // DING 1 - Very loud, deep
+                { 
+                    start: 0.0, 
+                    dur: 0.35, 
+                    freq: 523,      // C5
+                    vol: 1.0        // MAX VOLUME
+                },
+                // DING 2 - Slightly higher
+                { 
+                    start: 0.4, 
+                    dur: 0.35, 
+                    freq: 659,      // E5
+                    vol: 1.0
+                },
+                // DING 3 - Higher, bright
+                { 
+                    start: 0.8, 
+                    dur: 0.35, 
+                    freq: 784,      // G5
+                    vol: 1.0
+                },
+                // DING 4 - Very high (attention peak)
+                { 
+                    start: 1.2, 
+                    dur: 0.4, 
+                    freq: 988,      // B5
+                    vol: 1.0
+                },
+                // DING 5 - Final super bright
+                { 
+                    start: 1.7, 
+                    dur: 0.5, 
+                    freq: 1047,     // C6 - highest
+                    vol: 1.0
+                }
+            ];
+
+            for (let i = 0; i < numSamples; i++) {
+                const t = i / sampleRate;
+                let sample = 0;
+
+                bellDings.forEach(tone => {
+                    if (t >= tone.start && t < tone.start + tone.dur) {
+                        const localT = t - tone.start;
+                        const totalDur = tone.dur;
+
+                        // ==========================================
+                        // AGGRESSIVE BELL ENVELOPE (LOUDER)
+                        // ==========================================
+                        let envelope = 1;
+                        
+                        if (localT < 0.002) {
+                            // Ultra-fast attack (2ms) - IMMEDIATE LOUD
+                            envelope = localT / 0.002;
+                        } else if (localT < 0.2) {
+                            // Longer sustain - LOUDER for longer
+                            envelope = 1.0;
+                        } else {
+                            // Slower decay - rings out longer
+                            const decayTime = localT - 0.2;
+                            const decayDur = totalDur - 0.2;
+                            envelope = Math.exp(-2.5 * (decayTime / decayDur));
+                        }
+
+                        // ==========================================
+                        // MASSIVE HARMONICS - FULL BASS + TREBLE
+                        // ==========================================
+                        // Fundamental (main tone)
+                        sample += Math.sin(2 * Math.PI * tone.freq * t) * envelope * tone.vol * 0.8;
+                        
+                        // Harmonic 1: 2x (brightness)
+                        sample += Math.sin(2 * Math.PI * tone.freq * 2 * t) * envelope * tone.vol * 0.35;
+                        
+                        // Harmonic 2: 3x (bell character)
+                        sample += Math.sin(2 * Math.PI * tone.freq * 3 * t) * envelope * tone.vol * 0.25;
+                        
+                        // Harmonic 3: 4.2x (metallic shimmer)
+                        sample += Math.sin(2 * Math.PI * tone.freq * 4.2 * t) * envelope * tone.vol * 0.15;
+                        
+                        // Harmonic 4: 5.4x (high ping)
+                        sample += Math.sin(2 * Math.PI * tone.freq * 5.4 * t) * envelope * tone.vol * 0.1;
+                        
+                        // Harmonic 5: 7x (very high shimmer)
+                        sample += Math.sin(2 * Math.PI * tone.freq * 7 * t) * envelope * tone.vol * 0.08;
+                        
+                        // 🔥 SUB-BASS THUMP (heavy feel)
+                        sample += Math.sin(2 * Math.PI * tone.freq * 0.25 * t) * envelope * tone.vol * 0.3;
+                        
+                        // 🔥 BASS PUNCH
+                        sample += Math.sin(2 * Math.PI * tone.freq * 0.5 * t) * envelope * tone.vol * 0.25;
+                    }
+                });
+
+                // ==========================================
+                // HARD LIMITER - PREVENT DISTORTION
+                // ==========================================
+                // Clamp to max volume without distortion
+                sample = Math.max(-0.98, Math.min(0.98, sample));
+                
+                // Boost overall volume by 30% (make it REALLY loud)
+                sample = sample * 1.3;
+                
+                // Final safety clamp
+                sample = Math.max(-1, Math.min(1, sample));
+                
+                view.setInt16(44 + i * 2, sample * 0x7FFF, true);
+            }
+
+            const bytes = new Uint8Array(buffer);
+            let binary = '';
+            for (let i = 0; i < bytes.length; i++) {
+                binary += String.fromCharCode(bytes[i]);
+            }
+            return 'data:audio/wav;base64,' + btoa(binary);
+        }
+         // ==========================================
+        // 🎵 INIT BACKGROUND RINGTONE
+        // ==========================================
+        function initBackgroundRingtone() {
+            try {
+                const bgAudio = document.getElementById('bgRingtone');
+                if (!bgAudio) {
+                    const audio = document.createElement('audio');
+                    audio.id = 'bgRingtone';
+                    audio.preload = 'auto';
+                    audio.loop = false;  // ✅ NO LOOP
+                    audio.style.display = 'none';
+                    document.body.appendChild(audio);
+                }
+                
+                const audioEl = document.getElementById('bgRingtone');
+                const ringtoneData = generateCleanRingtone();
+                audioEl.src = ringtoneData;
+                audioEl.loop = false;  // ✅ NO LOOP
+                audioEl.load();
+
+                console.log('✅ Bell ringtone initialized');
+            } catch (e) {
+                console.log('⚠️ Ringtone error:', e);
+            }
+        }
+
+ // ==========================================
+// 🚨 PLAY RINGTONE - SIRF NAYE MESSAGES PAR
+// ==========================================
+function playRingtone() {
+    // ✅ 1. SOUND OFF HAI TOH SKIP
+    if (!soundEnabled) {
+        console.log('🔇 Sound disabled - skip ringtone');
+        return;
+    }
+    
+    // ✅ 2. PAGE BACKGROUND MEIN HAI TOH SKIP
+    if (document.hidden) {
+        console.log('🔇 Page hidden (background) - skip ringtone');
+        return;
+    }
+    
+    // ✅ 3. RINGTONE ALREADY BAJ RAHI HAI TOH SKIP
+    if (ringtonePlaying) {
+        console.log('🔇 Ringtone already playing');
+        return;
+    }
+
+    stopRingtone();
+    ringtonePlaying = true;
+    console.log('🚨 Bell ringing! (new message)');
+
+    // ✅ TRY METHOD 1: HTML AUDIO ELEMENT
+    try {
+        let bgAudio = document.getElementById('bgRingtone');
+        
+        // Agar audio element nahi hai toh banao
+        if (!bgAudio) {
+            console.log('🔧 Creating audio element...');
+            bgAudio = document.createElement('audio');
+            bgAudio.id = 'bgRingtone';
+            bgAudio.preload = 'auto';
+            bgAudio.style.display = 'none';
+            document.body.appendChild(bgAudio);
+            
+            const ringtoneData = generateCleanRingtone();
+            bgAudio.src = ringtoneData;
+            bgAudio.load();
+        }
+        
+        bgRingtoneAudio = bgAudio;
+        bgRingtoneAudio.currentTime = 0;
+        bgRingtoneAudio.volume = 1.0;
+        bgRingtoneAudio.loop = false;
+
+        const playPromise = bgRingtoneAudio.play();
+        
+        if (playPromise !== undefined) {
+            playPromise.then(() => {
+                console.log('✅ Ringtone playing (HTML Audio)');
+            }).catch((err) => {
+                console.log('⚠️ HTML Audio failed, using Web Audio API backup...');
+                // ✅ BACKUP: WEB AUDIO API SE BAJAO
+                playRingtoneWithWebAudio();
+            });
+        }
+
+        // ✅ 2.2 SECOND BAAD AUTO STOP
+        if (ringtoneStopTimer) clearTimeout(ringtoneStopTimer);
+        ringtoneStopTimer = setTimeout(() => {
+            ringtonePlaying = false;
+            ringtoneStopTimer = null;
+            console.log('✅ Ringtone auto-stopped');
+        }, 2200);
+        
+    } catch (e) {
+        console.log('⚠️ HTML Audio error, trying Web Audio API...', e);
+        // ✅ BACKUP: WEB AUDIO API SE BAJAO
+        playRingtoneWithWebAudio();
+    }
+
+    // 🔥 VIBRATION
+    if (navigator.vibrate) {
+        navigator.vibrate([500, 200, 500, 200, 500, 200, 500]);
+    }
+}
+
+// ==========================================
+// 🎵 BACKUP RINGTONE - WEB AUDIO API
+// ==========================================
+function playRingtoneWithWebAudio() {
+    try {
+        // ✅ AUDIO CONTEXT BANAO / RESUME KARO
+        if (!audioContext) {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioContext.state === 'suspended') {
+            audioContext.resume();
+        }
+        
+        const now = audioContext.currentTime;
+        
+        // ✅ 5 BELL DINGS - EXACT SAME PATTERN AS generateCleanRingtone
+        const bells = [
+            { freq: 523, start: 0.0, dur: 0.35 },   // C5
+            { freq: 659, start: 0.4, dur: 0.35 },   // E5
+            { freq: 784, start: 0.8, dur: 0.35 },   // G5
+            { freq: 988, start: 1.2, dur: 0.40 },   // B5
+            { freq: 1047, start: 1.7, dur: 0.50 }   // C6
+        ];
+        
+        bells.forEach((bell) => {
+            // ✅ FUNDAMENTAL + HARMONICS
+            const harmonics = [
+                { mult: 1.0, vol: 0.6 },   // Main
+                { mult: 2.0, vol: 0.25 },  // Brightness
+                { mult: 3.0, vol: 0.15 },  // Bell character
+                { mult: 4.2, vol: 0.10 },  // Metallic shimmer
+                { mult: 0.5, vol: 0.20 }   // Bass punch
+            ];
+            
+            harmonics.forEach((h) => {
+                const osc = audioContext.createOscillator();
+                const gain = audioContext.createGain();
+                
+                osc.connect(gain);
+                gain.connect(audioContext.destination);
+                
+                osc.frequency.value = bell.freq * h.mult;
+                osc.type = 'sine';
+                
+                const startTime = now + bell.start;
+                const endTime = startTime + bell.dur;
+                
+                gain.gain.setValueAtTime(0, startTime);
+                gain.gain.linearRampToValueAtTime(h.vol, startTime + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.001, endTime);
+                
+                osc.start(startTime);
+                osc.stop(endTime);
+            });
+        });
+        
+        console.log('✅ Ringtone playing (Web Audio API backup)');
+        
+        // ✅ 2.2 SECOND BAAD AUTO STOP
+        if (ringtoneStopTimer) clearTimeout(ringtoneStopTimer);
+        ringtoneStopTimer = setTimeout(() => {
+            ringtonePlaying = false;
+            ringtoneStopTimer = null;
+            console.log('✅ Ringtone auto-stopped');
+        }, 2200);
+        
+    } catch (e) {
+        console.log('❌ Web Audio API also failed:', e);
+        ringtonePlaying = false;
+    }
+}
+
+// ==========================================
+// 🔇 STOP RINGTONE
+// ==========================================
+function stopRingtone() {
+    // ✅ VIBRATION BAND KARO
+    if (navigator.vibrate) {
+        navigator.vibrate(0);
+    }
+
+    if (!ringtonePlaying) return;
+
+    ringtonePlaying = false;
+
+    // ✅ HTML AUDIO STOP KARO
+    try {
+        if (bgRingtoneAudio) {
+            bgRingtoneAudio.pause();
+            bgRingtoneAudio.currentTime = 0;
+        }
+    } catch (e) {}
+
+    // ✅ TIMER CLEAR KARO
+    if (ringtoneStopTimer) {
+        clearTimeout(ringtoneStopTimer);
+        ringtoneStopTimer = null;
+    }
+
+    console.log('🔇 Ringtone stopped');
+}
+
+// ==========================================
+// 📳 VIBRATE
+// ==========================================
+function vibrate() {
+    if (navigator.vibrate) {
+        navigator.vibrate([200, 100, 200]);
+    }
+}
+
+// ==========================================
+// 🔊 TOGGLE SOUND
+// ==========================================
+function toggleSound() {
+    soundEnabled = !soundEnabled;
+    localStorage.setItem('service_chat_sound', soundEnabled.toString());
+    updateSoundIcon();
+
+    if (!soundEnabled) {
+        stopRingtone();
+    } else {
+        playBeep();
+    }
+}
+
+function updateSoundIcon() {
+    const onIcon = document.getElementById('soundOnIcon');
+    const offIcon = document.getElementById('soundOffIcon');
+    const btn = document.getElementById('soundToggleBtn');
+
+    if (soundEnabled) {
+        onIcon.style.display = 'block';
+        offIcon.style.display = 'none';
+        btn.classList.remove('muted');
+    } else {
+        onIcon.style.display = 'none';
+        offIcon.style.display = 'block';
+        btn.classList.add('muted');
+    }
+}
+
+// ==========================================
+// 🔔 BEEP SOUND (toggle ke liye)
+// ==========================================
+function playBeep() {
+    try {
+        if (!audioContext) {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioContext.state === 'suspended') {
+            audioContext.resume();
+        }
+
+        const now = audioContext.currentTime;
+        const osc = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        
+        osc.connect(gain);
+        gain.connect(audioContext.destination);
+        
+        osc.frequency.value = 800;
+        osc.type = 'sine';
+        
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(0.2, now + 0.05);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+        
+        osc.start(now);
+        osc.stop(now + 0.2);
+    } catch (e) {}
+}
+        // ==========================================
+        // 🔔 NOTIFICATIONS
+        // ==========================================
+        function checkNotificationPermission() {
+            if (!('Notification' in window)) return;
+            if (Notification.permission === 'default') {
+                setTimeout(showNotifBanner, 3000);
+            }
+        }
+
+        function showNotifBanner() {
+            const banner = document.getElementById('notifBanner');
+            if (banner && Notification.permission === 'default') {
+                banner.classList.add('show');
+            }
+        }
+
+        function dismissNotifBanner() {
+            document.getElementById('notifBanner').classList.remove('show');
+        }
+
+        async function requestNotificationPermission() {
+            if (!('Notification' in window)) {
+                alert('Browser does not support notifications');
+                return;
+            }
+
+            try {
+                const permission = await Notification.requestPermission();
+                dismissNotifBanner();
+
+                if (permission === 'granted') {
+                    showNotification('Notifications Enabled ✅', 'You will now receive alerts for new messages');
+                }
+            } catch (e) {}
+        }
+
+        function showNotification(title, body) {
+            if (!('Notification' in window)) return;
+            if (Notification.permission !== 'granted') return;
+
+            try {
+                const notif = new Notification(title, {
+                    body: body,
+                    icon: 'https://img.icons8.com/color/48/tiktok.png',
+                    badge: 'https://img.icons8.com/color/48/tiktok.png',
+                    tag: 'chat-' + currentChatId,
+                    renotify: true,
+                    requireInteraction: true,
+                    silent: false
+                });
+
+                notif.onclick = function() {
+                    window.focus();
+                    this.close();
+                };
+
+                setTimeout(() => notif.close(), 10000);
+            } catch (e) {}
+        }
+
+        // ==========================================
+        // 📡 CONNECTION STATUS
+        // ==========================================
+        function showConnectionStatus(type, message) {
+            const el = document.getElementById('connectionStatus');
+            if (!el) return;
+            el.className = `connection-status ${type} show`;
+            el.textContent = (type === 'online' ? '✅ ' : '❌ ') + message;
+            setTimeout(() => el.classList.remove('show'), 3000);
+        }
+
+        // ==========================================
+        // ⌨️ KEYDOWN - SMART HANDLER
+        // ==========================================
+        function handleChatKeydown(event) {
+            const isMobile = /Android|iPhone|iPad|iPod|Mobile|webOS|BlackBerry|Opera Mini|IEMobile/i.test(navigator.userAgent)
+                          || ('ontouchstart' in window && window.innerWidth <= 1024);
+
+            if (isMobile) {
+                if (event.key === 'Enter' && !event.shiftKey) {
+                    // New line on mobile
+                    return;
+                }
+                return;
+            }
+
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendChatMessage();
+            }
+        }
+function autoResizeTextarea(el) {
+    // ✅ Mobile detect karo
+    const isMobile = /Android|iPhone|iPad|iPod|Mobile|webOS|BlackBerry|Opera Mini|IEMobile/i.test(navigator.userAgent)
+                  || ('ontouchstart' in window && window.innerWidth <= 1024);
+    
+    // ✅ Height reset
+    el.style.height = 'auto';
+    
+    const scrollHeight = el.scrollHeight;
+    const maxHeight = isMobile ? 100 : 120;
+    const minHeight = isMobile ? 40 : 42;
+    
+    if (scrollHeight <= maxHeight) {
+        el.style.height = scrollHeight + 'px';
+        el.style.overflowY = 'hidden';
+    } else {
+        // ✅ Scroll ON with touch support
+        el.style.height = maxHeight + 'px';
+        el.style.overflowY = 'auto';
+        el.style.overflowX = 'hidden';
+        el.style.webkitOverflowScrolling = 'touch';
+        el.style.touchAction = 'pan-y';
+    }
+    
+    if (el.clientHeight < minHeight) {
+        el.style.height = minHeight + 'px';
+        el.style.overflowY = 'hidden';
+    }
+}
+        // ==========================================
+        // 🖼️ IMAGE MODAL
+        // ==========================================
+        function openImageModal(url) {
+            document.getElementById('imageModalImg').src = url;
+            document.getElementById('imageModal').classList.add('active');
+        }
+
+        function closeImageModal() {
+            document.getElementById('imageModal').classList.remove('active');
+        }
+
+        // ==========================================
+        // 🔧 ESCAPE HTML
+        // ==========================================
+function escapeHTML(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML.replace(/\n/g, '<br>');
+}
+        // ==========================================
+        // 🔊 UNLOCK AUDIO ON FIRST INTERACTION
+        // ==========================================
+function unlockAudio() {
+    try {
+        console.log('🔊 Unlocking audio...');
+        
+        // ✅ AUDIO CONTEXT RESUME KARO
+        if (!audioContext) {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioContext.state === 'suspended') {
+            audioContext.resume().then(() => {
+                console.log('✅ AudioContext resumed');
+            });
+        }
+
+        // ✅ BACKGROUND RINGTONE INIT KARO
+        initBackgroundRingtone();
+
+        // ✅ SMALL TEST SOUND BAJAO (audio unlock ke liye)
+        const bgAudio = document.getElementById('bgRingtone');
+        if (bgAudio) {
+            bgAudio.volume = 0.01;
+            const p = bgAudio.play();
+            if (p !== undefined) {
+                p.then(() => {
+                    bgAudio.pause();
+                    bgAudio.currentTime = 0;
+                    bgAudio.volume = 1.0;
+                    console.log('✅ HTML Audio unlocked');
+                }).catch(() => {
+                    console.log('⚠️ HTML Audio unlock failed');
+                });
+            }
+        }
+        
+        // ✅ WEB AUDIO API BHI UNLOCK KARO
+        try {
+            const testOsc = audioContext.createOscillator();
+            const testGain = audioContext.createGain();
+            testOsc.connect(testGain);
+            testGain.connect(audioContext.destination);
+            testOsc.frequency.value = 200;
+            testGain.gain.setValueAtTime(0.001, audioContext.currentTime);
+            testOsc.start(audioContext.currentTime);
+            testOsc.stop(audioContext.currentTime + 0.01);
+            console.log('✅ Web Audio API unlocked');
+        } catch(e) {}
+        
+    } catch (e) {
+        console.log('Unlock error:', e);
+    }
+    // ✅ removeEventListener HATAO
+}
+        // ==========================================
+        // 📱 PREVENT BODY SCROLL
+        // ==========================================
+document.body.addEventListener('touchmove', function(e) {
+    // ✅ Allowed scrollable areas
+    const allowed = e.target.closest('.chat-messages') || 
+                    e.target.closest('.sidebar-users-list') ||
+                    e.target.closest('.chat-textarea') ||
+                    e.target.closest('.quick-send-scroll') ||
+                    e.target.closest('.quick-text-list');
+    
+    if (!allowed) {
+        e.preventDefault();
+    }
+}, { passive: false });
+
+        // ==========================================
+        // 🚪 LOGOUT SYSTEM
+        // ==========================================
+        function showLogoutConfirm() {
+            const existing = document.getElementById('logoutConfirmPopup');
+            if (existing) existing.remove();
+
+            const popup = document.createElement('div');
+            popup.id = 'logoutConfirmPopup';
+            popup.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.5);
+                z-index: 99999999;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+            `;
+
+            popup.innerHTML = `
+                <div style="
+                    background: #ffffff;
+                    border-radius: 16px;
+                    max-width: 380px;
+                    width: 100%;
+                    padding: 24px;
+                    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+                    text-align: center;
+                ">
+                    <div style="
+                        width: 56px;
+                        height: 56px;
+                        border-radius: 50%;
+                        background: #fee2e2;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        margin: 0 auto 16px;
+                    ">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                            <polyline points="16 17 21 12 16 7"/>
+                            <line x1="21" y1="12" x2="9" y2="12"/>
+                        </svg>
+                    </div>
+                    <div style="font-size: 18px; font-weight: 700; color: #1a1a1a; margin-bottom: 8px;">
+                        Logout?
+                    </div>
+                    <div style="font-size: 14px; color: #64748b; margin-bottom: 24px; line-height: 1.5;">
+                        Are you sure you want to <strong style="color:#dc2626;">logout</strong>?
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button onclick="closeLogoutConfirm()" style="
+                            flex: 1;
+                            padding: 12px 20px;
+                            background: #f1f5f9;
+                            color: #1a1a1a;
+                            border: none;
+                            border-radius: 10px;
+                            font-size: 14px;
+                            font-weight: 600;
+                            cursor: pointer;
+                        ">Cancel</button>
+                        <button onclick="performLogout()" style="
+                            flex: 1;
+                            padding: 12px 20px;
+                            background: #dc2626;
+                            color: #ffffff;
+                            border: none;
+                            border-radius: 10px;
+                            font-size: 14px;
+                            font-weight: 600;
+                            cursor: pointer;
+                        ">Logout</button>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(popup);
+        }
+
+        function closeLogoutConfirm() {
+            const popup = document.getElementById('logoutConfirmPopup');
+            if (popup) popup.remove();
+        }
+
+        async function performLogout() {
+            try {
+                closeLogoutConfirm();
+                stopRingtone();
+
+                if (chatUnsubscribe) { chatUnsubscribe(); chatUnsubscribe = null; }
+                if (usersUnsubscribe) { usersUnsubscribe(); usersUnsubscribe = null; }
+                if (chatsUnsubscribe) { chatsUnsubscribe(); chatsUnsubscribe = null; }
+
+                localStorage.removeItem('service_chat_user');
+
+                currentAdmin = null;
+                selectedUserId = null;
+                selectedUserData = null;
+                currentChatId = null;
+                allUsers = [];
+                allChatsData = {};
+                unreadCounts = {};
+                pinnedUserIds = [];
+                isFirstSnapshotLoad = {};
+
+                document.getElementById('chatApp').style.display = 'none';
+                document.getElementById('chatMessages').style.display = 'none';
+                document.getElementById('chatInputArea').style.display = 'none';
+                document.getElementById('noChatSelected').style.display = 'flex';
+
+                document.getElementById('loginEmail').value = '';
+                document.getElementById('loginPassword').value = '';
+                document.getElementById('loginError').style.display = 'none';
+
+                document.getElementById('loginScreen').classList.remove('hidden');
+
+                console.log('✅ Logged out');
+            } catch (error) {
+                console.error('❌ Logout error:', error);
+                localStorage.removeItem('service_chat_user');
+                document.getElementById('chatApp').style.display = 'none';
+                document.getElementById('loginScreen').classList.remove('hidden');
+            }
+        }
+
+        console.log('✅ Service Chat loaded!');
+        // ==========================================
+// ⚡ QUICK SEND BUTTONS SYSTEM
+// ==========================================
+
+// Default quick texts
+const DEFAULT_QUICK_TEXTS = [
+    "Hello! How can I help you?",
+    "Please wait a moment",
+    "Your order is being processed",
+    "Thank you for your patience",
+    "Is there anything else I can help with?",
+    "Please check your order details",
+    "Your withdrawal is being processed"
+];
+
+let quickTexts = [];
+
+// ==========================================
+// 📥 LOAD QUICK TEXTS FROM LOCALSTORAGE
+// ==========================================
+function loadQuickTexts() {
+    try {
+        const saved = localStorage.getItem('service_quick_texts');
+        if (saved) {
+            quickTexts = JSON.parse(saved);
+            console.log('✅ Quick texts loaded:', quickTexts.length);
+        } else {
+            // First time - default texts use karo
+            quickTexts = [...DEFAULT_QUICK_TEXTS];
+            localStorage.setItem('service_quick_texts', JSON.stringify(quickTexts));
+            console.log('✅ Default quick texts set');
+        }
+    } catch (e) {
+        quickTexts = [...DEFAULT_QUICK_TEXTS];
+    }
+    renderQuickSendButtons();
+}
+
+// ==========================================
+// 💾 SAVE QUICK TEXTS
+// ==========================================
+function saveQuickTexts() {
+    try {
+        localStorage.setItem('service_quick_texts', JSON.stringify(quickTexts));
+        console.log('✅ Quick texts saved');
+    } catch (e) {
+        console.log('❌ Save error:', e);
+    }
+}
+
+// ==========================================
+// 🎨 RENDER QUICK SEND BUTTONS
+// ==========================================
+function renderQuickSendButtons() {
+    const container = document.getElementById('quickSendScroll');
+    if (!container) return;
+    
+    if (quickTexts.length === 0) {
+        container.innerHTML = `
+            <div style="color:#94a3b8;font-size:12px;padding:6px 12px;white-space:nowrap;">
+                No quick texts - click ⚙️ to add
+            </div>
+        `;
+        return;
+    }
+    
+    let html = '';
+    quickTexts.forEach((text, index) => {
+        // Button peh 20 characters show karo
+        const displayText = text.length > 25 ? text.substring(0, 25) + '...' : text;
+        
+        html += `
+            <button class="quick-send-btn" 
+                    onclick="sendQuickText(${index}, this)" 
+                    title="${escapeHTML(text)}">
+                ${escapeHTML(displayText)}
+            </button>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+// ==========================================
+// 📤 SEND QUICK TEXT - INSTANT SEND
+// ==========================================
+async function sendQuickText(index, buttonEl) {
+    if (!currentChatId) {
+        alert('Please select a user first');
+        return;
+    }
+    
+    const text = quickTexts[index];
+    if (!text) return;
+    
+    console.log('⚡ Sending quick text:', text);
+    
+    // ✅ Button animation
+    if (buttonEl) {
+        buttonEl.classList.add('sent');
+        setTimeout(() => {
+            buttonEl.classList.remove('sent');
+        }, 600);
+    }
+    
+    try {
+        // ✅ Direct message send karo (input box use nahi karna)
+        await db.collection('chats')
+            .doc(currentChatId)
+            .collection('messages')
+            .add({
+                senderId: ADMIN_ID,
+                text: text,
+                timestamp: new Date().toISOString(),
+                isRead: false,
+                isRecalled: false
+            });
+        
+        // ✅ Chat metadata update karo
+        await db.collection('chats').doc(currentChatId).set({
+            participants: [selectedUserId, ADMIN_ID],
+            lastMessage: text.length > 50 ? text.substring(0, 50) + '...' : text,
+            lastMessageTime: new Date().toISOString(),
+            unreadCount: {
+                [selectedUserId]: firebase.firestore.FieldValue.increment(1)
+            }
+        }, { merge: true });
+        
+        console.log('✅ Quick text sent!');
+        
+    } catch (error) {
+        console.error('❌ Quick send error:', error);
+        alert('Failed to send: ' + error.message);
+    }
+}
+
+// ==========================================
+// ⚙️ OPEN QUICK TEXT MANAGER
+// ==========================================
+function openQuickTextManager() {
+    // Remove existing
+    const existing = document.getElementById('quickTextManagerPopup');
+    if (existing) existing.remove();
+    
+    const popup = document.createElement('div');
+    popup.id = 'quickTextManagerPopup';
+    popup.className = 'quick-text-manager';
+    
+    popup.innerHTML = `
+        <div class="quick-text-manager-content">
+            <div class="quick-text-header">
+                <h3>⚡ Quick Text Manager</h3>
+                <button onclick="closeQuickTextManager()">&times;</button>
+            </div>
+            
+            <div class="quick-text-list" id="quickTextList">
+                <!-- Items here -->
+            </div>
+            
+            <div class="quick-text-footer">
+                <button class="quick-text-add-btn" onclick="addQuickTextItem()">
+                    + Add New
+                </button>
+                <button class="quick-text-save-btn" onclick="saveQuickTextManager()">
+                    💾 Save All
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(popup);
+    
+    // Render items
+    renderQuickTextManagerItems();
+}
+
+// ==========================================
+// 🎨 RENDER MANAGER ITEMS
+// ==========================================
+function renderQuickTextManagerItems() {
+    const container = document.getElementById('quickTextList');
+    if (!container) return;
+    
+    if (quickTexts.length === 0) {
+        container.innerHTML = `
+            <div style="text-align:center;padding:40px 20px;color:#94a3b8;font-size:14px;">
+                No quick texts yet.<br>Click "+ Add New" to create one.
+            </div>
+        `;
+        return;
+    }
+    
+    let html = '';
+    quickTexts.forEach((text, index) => {
+        html += `
+            <div class="quick-text-item">
+                <input type="text" 
+                       value="${escapeHTML(text)}" 
+                       placeholder="Enter quick text..."
+                       data-index="${index}"
+                       oninput="updateQuickTextItem(${index}, this.value)">
+                <button onclick="removeQuickTextItem(${index})" title="Delete">🗑</button>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+// ==========================================
+// ➕ ADD NEW ITEM
+// ==========================================
+function addQuickTextItem() {
+    quickTexts.push('');
+    renderQuickTextManagerItems();
+    
+    // Focus last input
+    setTimeout(() => {
+        const inputs = document.querySelectorAll('#quickTextList input');
+        if (inputs.length > 0) {
+            inputs[inputs.length - 1].focus();
+        }
+    }, 100);
+}
+
+// ==========================================
+// ✏️ UPDATE ITEM
+// ==========================================
+function updateQuickTextItem(index, value) {
+    quickTexts[index] = value;
+}
+
+// ==========================================
+// 🗑️ REMOVE ITEM
+// ==========================================
+function removeQuickTextItem(index) {
+    if (!confirm('Delete this quick text?')) return;
+    quickTexts.splice(index, 1);
+    renderQuickTextManagerItems();
+}
+
+// ==========================================
+// 💾 SAVE ALL
+// ==========================================
+function saveQuickTextManager() {
+    // Filter empty texts
+    quickTexts = quickTexts.filter(t => t && t.trim() !== '');
+    
+    if (quickTexts.length === 0) {
+        alert('At least one quick text is required!');
+        return;
+    }
+    
+    // Trim all texts
+    quickTexts = quickTexts.map(t => t.trim());
+    
+    saveQuickTexts();
+    renderQuickSendButtons();
+    closeQuickTextManager();
+    
+    console.log('✅ Quick texts saved:', quickTexts.length);
+}
+
+// ==========================================
+// ❌ CLOSE MANAGER
+// ==========================================
+function closeQuickTextManager() {
+    const popup = document.getElementById('quickTextManagerPopup');
+    if (popup) popup.remove();
+}
+
+// ==========================================
+// 🎯 SHOW/HIDE QUICK SEND BAR
+// ==========================================
+function showQuickSendBar() {
+    const bar = document.getElementById('quickSendBar');
+    if (bar) bar.style.display = 'flex';
+}
+
+function hideQuickSendBar() {
+    const bar = document.getElementById('quickSendBar');
+    if (bar) bar.style.display = 'none';
+}
+
+// ✅ INIT QUICK TEXTS ON LOAD
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+        loadQuickTexts();
+    }, 1000);
+});
+    </script>
+</body>
+</html>

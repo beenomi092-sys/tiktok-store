@@ -1,0 +1,52 @@
+{
+  "name": "TikTok Store",
+  "short_name": "TikTok Store",
+  "description": "Shop from TikTok Store",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://firebasestorage.googleapis.com/v0/b/tiktokstore-playstore.firebasestorage.app/o/icons%2Ficon-72x72.png?alt=media",
+      "sizes": "72x72",
+      "type": "image/png"
+    },
+    {
+      "src": "https://firebasestorage.googleapis.com/v0/b/tiktokstore-playstore.firebasestorage.app/o/icons%2Ficon-96x96.png?alt=media",
+      "sizes": "96x96",
+      "type": "image/png"
+    },
+    {
+      "src": "https://firebasestorage.googleapis.com/v0/b/tiktokstore-playstore.firebasestorage.app/o/icons%2Ficon-128x128.png?alt=media",
+      "sizes": "128x128",
+      "type": "image/png"
+    },
+    {
+      "src": "https://firebasestorage.googleapis.com/v0/b/tiktokstore-playstore.firebasestorage.app/o/icons%2Ficon-144x144.png?alt=media",
+      "sizes": "144x144",
+      "type": "image/png"
+    },
+    {
+      "src": "https://firebasestorage.googleapis.com/v0/b/tiktokstore-playstore.firebasestorage.app/o/icons%2Ficon-152x152.png?alt=media",
+      "sizes": "152x152",
+      "type": "image/png"
+    },
+    {
+      "src": "https://firebasestorage.googleapis.com/v0/b/tiktokstore-playstore.firebasestorage.app/o/icons%2Ficon-192x192.png?alt=media",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://firebasestorage.googleapis.com/v0/b/tiktokstore-playstore.firebasestorage.app/o/icons%2Ficon-384x384.png?alt=media",
+      "sizes": "384x384",
+      "type": "image/png"
+    },
+    {
+      "src": "https://firebasestorage.googleapis.com/v0/b/tiktokstore-playstore.firebasestorage.app/o/icons%2Ficon-512x512.png?alt=media",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
